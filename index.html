@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vikas R — Full Stack Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --sky:#87CEEB;
+  --ground:#4a4a4a;
+  --cactus:#4CAF50;
+  --dino-gray:#535353;
+  --pixel:#1a1a1a;
+  --white:#f5f5f5;
+  --mc-blue:#4FC3F7;
+  --mc-green:#66BB6A;
+  --mc-brown:#8D6E63;
+  --mc-stone:#9E9E9E;
+  --accent:#64B5F6;
+  --text-main:#e8e8e8;
+  --text-mute:#9e9e9e;
+  --card-bg:rgba(20,20,20,0.85);
+  --border-col:rgba(100,181,246,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+/* ===================== SCROLLBAR ===================== */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#1a1a1a}
+::-webkit-scrollbar-thumb{background:#4FC3F7;border-radius:4px}
+
+/* ===================== BASE ===================== */
+body{
+  background:#0d0d0d;
+  color:var(--text-main);
+  font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ===================== CUSTOM CURSOR ===================== */
+#cursor{
+  position:fixed;width:20px;height:20px;
+  background:transparent;border:2px solid var(--mc-blue);
+  image-rendering:pixelated;
+  pointer-events:none;z-index:99999;
+  transition:transform .1s ease;
+  clip-path:polygon(0 0,100% 0,100% 70%,70% 70%,70% 100%,0 100%);
+}
+#cursor-dot{
+  position:fixed;width:6px;height:6px;
+  background:var(--mc-blue);
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+}
+body:hover #cursor{transform:scale(1.2)}
+
+/* ===================== 3D CANVAS ===================== */
+#three-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:0;
+  opacity:.55;
+}
+
+/* ===================== NOISE OVERLAY ===================== */
+.noise{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:1;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===================== DINO GAME STRIP ===================== */
+#dino-strip{
+  position:fixed;bottom:0;left:0;right:0;
+  height:100px;z-index:10;
+  background:linear-gradient(to top,#111,transparent);
+  overflow:hidden;pointer-events:none;
+}
+#dino-ground-line{
+  position:absolute;bottom:28px;left:0;right:0;
+  height:2px;background:#4FC3F7;opacity:.4;
+}
+.cloud-pixel{
+  position:absolute;
+  background:#3a3a3a;
+  image-rendering:pixelated;
+}
+
+/* ===================== NAV ===================== */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2rem;
+  background:rgba(10,10,10,.8);
+  border-bottom:1px solid var(--border-col);
+  backdrop-filter:blur(10px);
+}
+.nav-logo{
+  font-family:'VT323',monospace;
+  font-size:1.8rem;
+  color:var(--mc-blue);
+  text-shadow:0 0 10px rgba(79,195,247,.5);
+  letter-spacing:.05em;
+}
+.nav-logo span{color:#66BB6A}
+.nav-links{
+  display:flex;gap:1.5rem;
+  list-style:none;
+}
+.nav-links a{
+  font-family:'Share Tech Mono',monospace;
+  color:var(--text-mute);
+  text-decoration:none;
+  font-size:.85rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  transition:color .2s,text-shadow .2s;
+  position:relative;
+}
+.nav-links a::before{
+  content:'> ';color:var(--mc-blue);
+  opacity:0;transition:opacity .2s;
+}
+.nav-links a:hover{
+  color:var(--mc-blue);
+  text-shadow:0 0 8px rgba(79,195,247,.6);
+}
+.nav-links a:hover::before{opacity:1}
+
+/* ===================== SECTIONS ===================== */
+section{
+  position:relative;z-index:5;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:6rem 2rem 4rem;
+}
+
+/* ===================== HERO ===================== */
+#hero{
+  text-align:center;
+  min-height:100vh;
+  background:radial-gradient(ellipse at 50% 40%,rgba(79,195,247,.08) 0%,transparent 70%);
+}
+.hero-tag{
+  font-family:'Share Tech Mono',monospace;
+  color:var(--mc-blue);font-size:.9rem;
+  letter-spacing:.2em;text-transform:uppercase;
+  margin-bottom:1rem;opacity:.8;
+  animation:fadeUp .6s ease both;
+}
+.hero-name{
+  font-family:'VT323',monospace;
+  font-size:clamp(4rem,12vw,9rem);
+  line-height:1;
+  color:var(--white);
+  text-shadow:0 0 30px rgba(79,195,247,.3),4px 4px 0 rgba(79,195,247,.15);
+  animation:fadeUp .7s ease .1s both;
+  letter-spacing:.02em;
+}
+.hero-name .accent{color:var(--mc-blue)}
+.hero-title{
+  font-size:clamp(1rem,3vw,1.6rem);
+  color:var(--mc-green);
+  font-weight:600;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  margin:.5rem 0 1.5rem;
+  animation:fadeUp .7s ease .2s both;
+}
+.hero-desc{
+  max-width:580px;
+  margin:0 auto 2.5rem;
+  color:var(--text-mute);
+  line-height:1.7;
+  font-size:1.05rem;
+  animation:fadeUp .7s ease .3s both;
+}
+.hero-btns{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .7s ease .4s both;
+}
+.btn-primary{
+  font-family:'Share Tech Mono',monospace;
+  background:var(--mc-blue);color:#000;
+  padding:.7rem 2rem;
+  font-size:.9rem;letter-spacing:.1em;
+  text-decoration:none;font-weight:700;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:transform .15s,box-shadow .15s;
+  text-transform:uppercase;
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(79,195,247,.4);
+}
+.btn-secondary{
+  font-family:'Share Tech Mono',monospace;
+  background:transparent;color:var(--mc-blue);
+  padding:.7rem 2rem;
+  font-size:.9rem;letter-spacing:.1em;
+  text-decoration:none;font-weight:600;
+  border:1px solid var(--mc-blue);
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:background .15s,transform .15s;
+  text-transform:uppercase;
+}
+.btn-secondary:hover{
+  background:rgba(79,195,247,.1);
+  transform:translateY(-2px);
+}
+
+/* ===================== DINO SVG ===================== */
+.dino-hero-wrap{
+  position:relative;margin:2rem auto 0;
+  width:160px;animation:dinoRun 8s linear infinite;
+}
+@keyframes dinoRun{
+  0%{transform:translateX(-200px)}
+  100%{transform:translateX(calc(100vw + 200px))}
+}
+.dino-sprite{
+  width:80px;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 4px 10px rgba(79,195,247,.3));
+}
+
+/* ===================== PIXEL SCROLL INDICATOR ===================== */
+.scroll-hint{
+  position:absolute;bottom:110px;left:50%;transform:translateX(-50%);
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;color:var(--text-mute);letter-spacing:.15em;
+  text-transform:uppercase;
+  animation:blink 1.2s step-end infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* ===================== SECTION TITLES ===================== */
+.section-label{
+  font-family:'Share Tech Mono',monospace;
+  color:var(--mc-blue);font-size:.8rem;
+  letter-spacing:.25em;text-transform:uppercase;
+  margin-bottom:.5rem;opacity:.7;
+}
+.section-title{
+  font-family:'VT323',monospace;
+  font-size:clamp(2.5rem,7vw,4.5rem);
+  color:var(--white);
+  margin-bottom:.5rem;
+  text-shadow:3px 3px 0 rgba(79,195,247,.2);
+}
+.section-line{
+  width:60px;height:3px;
+  background:linear-gradient(90deg,var(--mc-blue),var(--mc-green));
+  margin:0 auto 3rem;
+}
+
+/* ===================== ABOUT ===================== */
+#about{background:linear-gradient(180deg,transparent,rgba(79,195,247,.03) 50%,transparent)}
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 1.5fr;
+  gap:3rem;max-width:1000px;width:100%;
+  align-items:center;
+}
+.mc-char-container{
+  position:relative;
+  display:flex;justify-content:center;align-items:center;
+}
+.mc-platform{
+  width:220px;height:220px;
+  position:relative;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-16px)}
+}
+
+/* Minecraft Character SVG Block */
+.about-text{text-align:left}
+.about-text p{
+  color:var(--text-mute);line-height:1.8;
+  font-size:1.05rem;margin-bottom:1rem;
+}
+.about-text p strong{color:var(--mc-blue)}
+.mc-stat-row{
+  display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;
+}
+.mc-stat{
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:.6rem 1.2rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.8rem;
+  color:var(--mc-green);
+  letter-spacing:.1em;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+
+/* ===================== SKILLS ===================== */
+#skills{background:rgba(0,0,0,.3)}
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1.2rem;
+  max-width:1000px;width:100%;
+}
+.skill-block{
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:1.4rem 1.2rem;
+  position:relative;
+  overflow:hidden;
+  transition:transform .2s,border-color .2s;
+}
+.skill-block:hover{
+  transform:translateY(-4px);
+  border-color:rgba(79,195,247,.7);
+}
+.skill-block::before{
+  content:'';
+  position:absolute;top:0;left:0;
+  width:3px;height:100%;
+  background:linear-gradient(180deg,var(--mc-blue),var(--mc-green));
+}
+.skill-cat{
+  font-family:'Share Tech Mono',monospace;
+  font-size:.7rem;color:var(--text-mute);
+  letter-spacing:.2em;text-transform:uppercase;
+  margin-bottom:.7rem;
+}
+.skill-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+.stag{
+  background:rgba(79,195,247,.08);
+  border:1px solid rgba(79,195,247,.2);
+  padding:.25rem .6rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;color:var(--accent);
+  transition:background .2s;
+}
+.stag:hover{background:rgba(79,195,247,.2)}
+
+/* ===================== PROJECTS ===================== */
+#projects{background:linear-gradient(180deg,transparent,rgba(102,187,106,.03) 50%,transparent)}
+.projects-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.8rem;max-width:1100px;width:100%;
+}
+.proj-card{
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:1.8rem;
+  position:relative;
+  overflow:hidden;
+  transition:transform .25s,border-color .25s,box-shadow .25s;
+  cursor:pointer;
+}
+.proj-card:hover{
+  transform:translateY(-8px) scale(1.01);
+  border-color:rgba(79,195,247,.6);
+  box-shadow:0 20px 50px rgba(79,195,247,.1),inset 0 0 60px rgba(79,195,247,.03);
+}
+.proj-card::after{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--mc-blue),var(--mc-green),transparent);
+  transition:left .4s ease;
+}
+.proj-card:hover::after{left:100%}
+.proj-number{
+  font-family:'VT323',monospace;
+  font-size:3.5rem;color:rgba(79,195,247,.08);
+  position:absolute;top:.5rem;right:1rem;
+  line-height:1;pointer-events:none;
+}
+.proj-icon{
+  width:40px;height:40px;margin-bottom:1rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.proj-name{
+  font-family:'Rajdhani',sans-serif;
+  font-weight:700;font-size:1.3rem;
+  color:var(--white);margin-bottom:.4rem;
+}
+.proj-desc{
+  color:var(--text-mute);
+  font-size:.95rem;line-height:1.6;
+  margin-bottom:1.2rem;
+}
+.proj-techs{display:flex;flex-wrap:wrap;gap:.4rem}
+.ptech{
+  background:rgba(102,187,106,.08);
+  border:1px solid rgba(102,187,106,.25);
+  padding:.2rem .55rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.7rem;color:var(--mc-green);
+}
+
+/* ===================== EXPERIENCE ===================== */
+#experience{background:rgba(0,0,0,.2)}
+.exp-card{
+  max-width:800px;width:100%;
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:2.5rem;
+  position:relative;
+  overflow:hidden;
+}
+.exp-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--mc-blue),var(--mc-green),var(--mc-blue));
+}
+.exp-header{
+  display:flex;justify-content:space-between;
+  align-items:flex-start;gap:1rem;flex-wrap:wrap;
+  margin-bottom:1.5rem;
+}
+.exp-role{
+  font-family:'Rajdhani',sans-serif;
+  font-weight:700;font-size:1.5rem;
+  color:var(--white);
+}
+.exp-company{
+  color:var(--mc-blue);font-size:1rem;
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:.05em;
+}
+.exp-badge{
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;
+  background:rgba(79,195,247,.1);
+  border:1px solid rgba(79,195,247,.3);
+  color:var(--mc-blue);
+  padding:.3rem .8rem;
+  white-space:nowrap;
+}
+.exp-points{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+.exp-points li{
+  color:var(--text-mute);
+  font-size:.95rem;line-height:1.6;
+  padding-left:1.5rem;position:relative;
+}
+.exp-points li::before{
+  content:'▸';
+  position:absolute;left:0;
+  color:var(--mc-green);
+}
+
+/* ===================== EDUCATION ===================== */
+#education{background:linear-gradient(180deg,transparent,rgba(79,195,247,.03) 50%,transparent)}
+.edu-card{
+  max-width:700px;width:100%;
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:2rem;
+  display:grid;grid-template-columns:auto 1fr;gap:1.5rem;
+  align-items:center;
+}
+.edu-pixel-icon{
+  width:70px;height:70px;
+  background:rgba(79,195,247,.1);
+  border:2px solid var(--mc-blue);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'VT323',monospace;font-size:2rem;
+  color:var(--mc-blue);
+  flex-shrink:0;
+}
+.edu-name{font-weight:700;font-size:1.2rem;color:var(--white);margin-bottom:.3rem}
+.edu-deg{color:var(--mc-blue);font-family:'Share Tech Mono',monospace;font-size:.85rem;letter-spacing:.05em}
+.edu-info{
+  display:flex;gap:1.5rem;flex-wrap:wrap;
+  margin-top:.8rem;
+}
+.edu-pill{
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;color:var(--mc-green);
+  background:rgba(102,187,106,.08);
+  border:1px solid rgba(102,187,106,.25);
+  padding:.25rem .7rem;
+}
+
+/* ===================== COURSES ===================== */
+.courses-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1rem;max-width:800px;width:100%;
+  margin-top:2rem;
+}
+.course-item{
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:1rem 1.2rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.78rem;color:var(--text-mute);
+  letter-spacing:.05em;
+  transition:border-color .2s,color .2s;
+}
+.course-item:hover{border-color:rgba(79,195,247,.5);color:var(--mc-blue)}
+.course-item::before{content:'📚 ';font-family:sans-serif}
+
+/* ===================== CONTACT ===================== */
+#contact{text-align:center}
+.contact-grid{
+  display:flex;flex-wrap:wrap;
+  gap:1.2rem;justify-content:center;
+  max-width:700px;margin-top:2rem;
+}
+.contact-link{
+  display:flex;align-items:center;gap:.75rem;
+  background:var(--card-bg);
+  border:1px solid var(--border-col);
+  padding:1rem 1.8rem;
+  text-decoration:none;
+  color:var(--text-main);
+  font-family:'Share Tech Mono',monospace;
+  font-size:.85rem;letter-spacing:.08em;
+  transition:transform .2s,border-color .2s,color .2s;
+  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+}
+.contact-link:hover{
+  transform:translateY(-4px);
+  border-color:rgba(79,195,247,.7);
+  color:var(--mc-blue);
+}
+.c-icon{width:22px;height:22px;opacity:.7}
+
+/* ===================== FOOTER ===================== */
+footer{
+  position:relative;z-index:5;
+  text-align:center;
+  padding:2rem;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;
+  color:var(--text-mute);
+  border-top:1px solid var(--border-col);
+  letter-spacing:.1em;
+}
+footer span{color:var(--mc-green)}
+
+/* ===================== MINECRAFT FLOATING CUBES ===================== */
+.mc-cube{
+  position:fixed;
+  image-rendering:pixelated;
+  pointer-events:none;
+  z-index:3;
+  opacity:.6;
+  animation:cubeFloat linear infinite;
+}
+@keyframes cubeFloat{
+  0%{transform:translateY(100vh) rotate(0deg)}
+  100%{transform:translateY(-120px) rotate(720deg)}
+}
+
+/* ===================== PARALLAX STARS ===================== */
+#stars-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;z-index:2;
+  opacity:.5;
+}
+
+/* ===================== ANIMATIONS ===================== */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.reveal{
+  opacity:0;transform:translateY(30px);
+  transition:opacity .6s ease,transform .6s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ===================== PROGRESS BARS ===================== */
+.skill-bar-wrap{margin:.5rem 0}
+.skill-bar-label{
+  display:flex;justify-content:space-between;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;color:var(--text-mute);
+  margin-bottom:.25rem;
+}
+.skill-bar-track{
+  height:6px;background:rgba(255,255,255,.05);
+  position:relative;overflow:hidden;
+}
+.skill-bar-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--mc-blue),var(--mc-green));
+  transition:width 1s ease;
+}
+
+/* ===================== MOBILE ===================== */
+@media(max-width:768px){
+  .about-grid{grid-template-columns:1fr;text-align:center}
+  .about-text{text-align:center}
+  .mc-stat-row{justify-content:center}
+  .nav-links{display:none}
+  .exp-header{flex-direction:column}
+  .edu-card{grid-template-columns:1fr;text-align:center}
+  .edu-pixel-icon{margin:0 auto}
+}
+@media(max-width:480px){
+  section{padding:5rem 1rem 3rem}
+  .hero-desc{font-size:.95rem}
+  nav{padding:.8rem 1rem}
+}
+
+/* ===================== PIXEL BORDERS ===================== */
+.px-border{
+  position:relative;
+}
+.px-border::before,.px-border::after{
+  content:'';position:absolute;
+  width:10px;height:10px;
+}
+.px-border::before{
+  top:-2px;left:-2px;
+  border-top:2px solid var(--mc-blue);
+  border-left:2px solid var(--mc-blue);
+}
+.px-border::after{
+  bottom:-2px;right:-2px;
+  border-bottom:2px solid var(--mc-green);
+  border-right:2px solid var(--mc-green);
+}
+
+/* ===================== SCROLLING TICKER ===================== */
+.ticker-wrap{
+  position:relative;z-index:5;
+  overflow:hidden;height:36px;
+  background:rgba(79,195,247,.05);
+  border-top:1px solid var(--border-col);
+  border-bottom:1px solid var(--border-col);
+}
+.ticker{
+  display:flex;white-space:nowrap;
+  animation:ticker 30s linear infinite;
+  height:100%;align-items:center;
+}
+.ticker-item{
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;letter-spacing:.12em;
+  color:var(--text-mute);padding:0 2rem;
+  text-transform:uppercase;
+}
+.ticker-sep{color:var(--mc-blue);margin:0 .5rem}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ===================== PIXEL DINO ANIMATION ===================== */
+@keyframes dinoLegs{
+  0%,100%{d:path('M 35 60 L 28 75 L 34 75 M 42 60 L 48 75 L 54 75')}
+  50%{d:path('M 35 60 L 30 75 L 36 75 M 42 60 L 44 75 L 50 75')}
+}
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<!-- 3D THREE.JS CANVAS -->
+<canvas id="three-canvas"></canvas>
+
+<!-- STARS CANVAS -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- NOISE OVERLAY -->
+<div class="noise"></div>
+
+<!-- DINO STRIP -->
+<div id="dino-strip">
+  <div id="dino-ground-line"></div>
+</div>
+
+<!-- ===================== NAVIGATION ===================== -->
+<nav>
+  <div class="nav-logo">VR<span>.</span>DEV</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero">
+  <p class="hero-tag">// Full Stack Developer</p>
+  <h1 class="hero-name"><span class="accent">Vikas</span> R</h1>
+  <p class="hero-title">Building the Web, One Block at a Time</p>
+  <p class="hero-desc">
+    Full-stack developer crafting scalable web applications, RESTful APIs, and intuitive UI/UX interfaces.
+    2+ years building in React, Node.js, and beyond.
+  </p>
+  <div class="hero-btns">
+    <a href="#projects" class="btn-primary">View Projects</a>
+    <a href="#contact" class="btn-secondary">Contact Me</a>
+    <a href="https://github.com/rvikas549" target="_blank" class="btn-secondary">GitHub</a>
+  </div>
+  <p class="scroll-hint">↓ Scroll to explore ↓</p>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">React.js <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Node.js <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">TypeScript <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">PostgreSQL <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Spring Boot <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">MongoDB <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Socket.IO <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">MERN Stack <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Redux <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">REST APIs <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Git <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Agile <span class="ticker-sep">◆</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">React.js <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Node.js <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">TypeScript <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">PostgreSQL <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Spring Boot <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">MongoDB <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Socket.IO <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">MERN Stack <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Redux <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">REST APIs <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Git <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Agile <span class="ticker-sep">◆</span></span>
+  </div>
+</div>
+
+<!-- ===================== ABOUT ===================== -->
+<section id="about">
+  <p class="section-label reveal">// player.info</p>
+  <h2 class="section-title reveal">About Me</h2>
+  <div class="section-line reveal"></div>
+  <div class="about-grid">
+    <div class="mc-char-container reveal">
+      <!-- Minecraft-style character SVG -->
+      <svg class="mc-platform" viewBox="0 0 220 280" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 10px 30px rgba(79,195,247,0.3))">
+        <!-- Shadow -->
+        <ellipse cx="110" cy="265" rx="55" ry="10" fill="rgba(0,0,0,0.4)"/>
+        <!-- Platform block -->
+        <rect x="60" y="240" width="100" height="20" fill="#4FC3F7" rx="2"/>
+        <rect x="60" y="240" width="100" height="4" fill="#81D4FA" rx="2"/>
+        <!-- Body (Minecraft-style) -->
+        <!-- Head -->
+        <rect x="77" y="90" width="66" height="66" fill="#FFCC80" rx="2"/>
+        <!-- Hair/Helmet top -->
+        <rect x="72" y="82" width="76" height="20" fill="#4FC3F7" rx="2"/>
+        <rect x="72" y="82" width="76" height="8" fill="#81D4FA" rx="2"/>
+        <!-- Eyes -->
+        <rect x="88" y="108" width="16" height="16" fill="#1a1a1a" rx="1"/>
+        <rect x="116" y="108" width="16" height="16" fill="#1a1a1a" rx="1"/>
+        <rect x="91" y="111" width="6" height="6" fill="white"/>
+        <rect x="119" y="111" width="6" height="6" fill="white"/>
+        <!-- Smile -->
+        <rect x="94" y="132" width="6" height="5" fill="#cc7a00" rx="1"/>
+        <rect x="103" y="134" width="14" height="3" fill="#cc7a00" rx="1"/>
+        <rect x="120" y="132" width="6" height="5" fill="#cc7a00" rx="1"/>
+        <!-- Torso (shirt) -->
+        <rect x="72" y="158" width="76" height="70" fill="#4FC3F7" rx="2"/>
+        <rect x="72" y="158" width="76" height="8" fill="#81D4FA" rx="2"/>
+        <!-- Code symbol on shirt -->
+        <text x="110" y="200" text-anchor="middle" fill="rgba(0,0,0,0.5)" font-size="22" font-family="monospace" font-weight="bold">&lt;/&gt;</text>
+        <!-- Arms -->
+        <rect x="36" y="158" width="34" height="60" fill="#FFCC80" rx="2"/>
+        <rect x="150" y="158" width="34" height="60" fill="#FFCC80" rx="2"/>
+        <!-- Left arm sleeve -->
+        <rect x="36" y="158" width="34" height="10" fill="#4FC3F7" rx="2"/>
+        <rect x="150" y="158" width="34" height="10" fill="#4FC3F7" rx="2"/>
+        <!-- Legs -->
+        <rect x="78" y="228" width="28" height="14" fill="#1565C0" rx="2"/>
+        <rect x="114" y="228" width="28" height="14" fill="#1565C0" rx="2"/>
+        <!-- Shoes -->
+        <rect x="74" y="238" width="32" height="6" fill="#333" rx="2"/>
+        <rect x="114" y="238" width="32" height="6" fill="#333" rx="2"/>
+        <!-- Floating name tag -->
+        <rect x="70" y="60" width="80" height="22" fill="rgba(0,0,0,0.7)" rx="3"/>
+        <rect x="70" y="60" width="80" height="22" fill="none" stroke="#4FC3F7" stroke-width="1" rx="3"/>
+        <text x="110" y="76" text-anchor="middle" fill="#4FC3F7" font-size="11" font-family="monospace">Vikas_R</text>
+      </svg>
+    </div>
+    <div class="about-text reveal">
+      <p>Hey! I'm <strong>Vikas R</strong>, a Full-Stack Developer from Bengaluru, Karnataka — currently grinding through my B.E. in Computer Science at JSS Academy of Technical Education.</p>
+      <p>I specialize in building <strong>scalable web applications</strong>, RESTful APIs, and intuitive UI/UX interfaces. Think of me as the dev who bridges the gap between pixel-perfect frontends and bulletproof backends.</p>
+      <p>Currently interning as a <strong>React Developer at Vizion Systems (UK & India)</strong>, contributing to production-level frontend architecture with 55+ PRs merged.</p>
+      
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Frontend Dev</span><span>90%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" data-width="90"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Backend Dev</span><span>80%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" data-width="80"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Data Structures & Algorithms</span><span>75%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" data-width="75"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>DevOps & Tools</span><span>70%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" data-width="70"></div></div>
+      </div>
+
+      <div class="mc-stat-row">
+        <div class="mc-stat">📍 Bengaluru, IN</div>
+        <div class="mc-stat">🎓 B.E. CSE</div>
+        <div class="mc-stat">💼 Intern @ Vizion</div>
+        <div class="mc-stat">⭐ CGPA 8.5</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SKILLS ===================== -->
+<section id="skills">
+  <p class="section-label reveal">// skill_tree.unlock()</p>
+  <h2 class="section-title reveal">Skills</h2>
+  <div class="section-line reveal"></div>
+  <div class="skills-grid">
+    <div class="skill-block reveal px-border">
+      <div class="skill-cat">Frontend</div>
+      <div class="skill-tags">
+        <span class="stag">React.js</span>
+        <span class="stag">TypeScript</span>
+        <span class="stag">Material UI</span>
+        <span class="stag">HTML/CSS</span>
+        <span class="stag">Bootstrap</span>
+        <span class="stag">EJS</span>
+      </div>
+    </div>
+    <div class="skill-block reveal px-border">
+      <div class="skill-cat">Backend</div>
+      <div class="skill-tags">
+        <span class="stag">Node.js</span>
+        <span class="stag">Express.js</span>
+        <span class="stag">Spring Boot</span>
+        <span class="stag">REST APIs</span>
+        <span class="stag">Socket.IO</span>
+      </div>
+    </div>
+    <div class="skill-block reveal px-border">
+      <div class="skill-cat">Databases</div>
+      <div class="skill-tags">
+        <span class="stag">PostgreSQL</span>
+        <span class="stag">MongoDB</span>
+        <span class="stag">Firebase</span>
+        <span class="stag">CRDT/Yjs</span>
+      </div>
+    </div>
+    <div class="skill-block reveal px-border">
+      <div class="skill-cat">Tools & Platforms</div>
+      <div class="skill-tags">
+        <span class="stag">Git/GitHub</span>
+        <span class="stag">VS Code</span>
+        <span class="stag">Postman</span>
+        <span class="stag">Vercel</span>
+        <span class="stag">Render</span>
+        <span class="stag">Figma</span>
+      </div>
+    </div>
+    <div class="skill-block reveal px-border">
+      <div class="skill-cat">State & Arch</div>
+      <div class="skill-tags">
+        <span class="stag">Redux</span>
+        <span class="stag">React Hooks</span>
+        <span class="stag">JWT Auth</span>
+        <span class="stag">OAuth</span>
+        <span class="stag">Agile</span>
+      </div>
+    </div>
+    <div class="skill-block reveal px-border">
+      <div class="skill-cat">Other</div>
+      <div class="skill-tags">
+        <span class="stag">Java OOP</span>
+        <span class="stag">Python</span>
+        <span class="stag">spaCy NLP</span>
+        <span class="stag">CNN/ML</span>
+        <span class="stag">DSA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PROJECTS ===================== -->
+<section id="projects">
+  <p class="section-label reveal">// projects.load()</p>
+  <h2 class="section-title reveal">Projects</h2>
+  <div class="section-line reveal"></div>
+  <div class="projects-grid">
+
+    <!-- CollabDocs -->
+    <div class="proj-card reveal">
+      <div class="proj-number">01</div>
+      <div class="proj-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="4" fill="rgba(79,195,247,0.1)"/>
+          <rect x="8" y="10" width="24" height="4" rx="1" fill="#4FC3F7"/>
+          <rect x="8" y="17" width="18" height="3" rx="1" fill="#4FC3F7" opacity=".6"/>
+          <rect x="8" y="23" width="20" height="3" rx="1" fill="#4FC3F7" opacity=".4"/>
+          <circle cx="30" cy="28" r="7" fill="rgba(102,187,106,0.3)" stroke="#66BB6A" stroke-width="1.5"/>
+          <text x="30" y="32" text-anchor="middle" fill="#66BB6A" font-size="9" font-weight="bold">✓</text>
+        </svg>
+      </div>
+      <div class="proj-name">CollabDocs</div>
+      <div class="proj-desc">Real-time collaborative document editing platform inspired by Google Docs. Firebase OAuth, JWT auth, Socket.IO rooms, Yjs CRDT sync — built for multi-user production workflows.</div>
+      <div class="proj-techs">
+        <span class="ptech">React.js</span>
+        <span class="ptech">Node.js</span>
+        <span class="ptech">MongoDB</span>
+        <span class="ptech">Socket.IO</span>
+        <span class="ptech">Yjs CRDT</span>
+        <span class="ptech">Firebase</span>
+        <span class="ptech">JWT</span>
+      </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="proj-card reveal">
+      <div class="proj-number">02</div>
+      <div class="proj-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="4" fill="rgba(102,187,106,0.1)"/>
+          <rect x="6" y="8" width="28" height="18" rx="3" fill="none" stroke="#66BB6A" stroke-width="1.5"/>
+          <polygon points="12,26 18,26 15,32" fill="#66BB6A"/>
+          <circle cx="13" cy="17" r="2" fill="#66BB6A"/>
+          <circle cx="20" cy="17" r="2" fill="#66BB6A"/>
+          <circle cx="27" cy="17" r="2" fill="#66BB6A"/>
+        </svg>
+      </div>
+      <div class="proj-name">Institutional ChatBot</div>
+      <div class="proj-desc">ERP-integrated chatbot for Admin, Teachers & Students. NLP-based intent recognition via spaCy, academic performance analytics, and institutional updates through conversational UI.</div>
+      <div class="proj-techs">
+        <span class="ptech">React.js</span>
+        <span class="ptech">Node.js</span>
+        <span class="ptech">PostgreSQL</span>
+        <span class="ptech">Python3</span>
+        <span class="ptech">spaCy NLP</span>
+        <span class="ptech">Express.js</span>
+      </div>
+    </div>
+
+    <!-- Social Media -->
+    <div class="proj-card reveal">
+      <div class="proj-number">03</div>
+      <div class="proj-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="4" fill="rgba(141,110,99,0.15)"/>
+          <circle cx="20" cy="14" r="5" stroke="#64B5F6" stroke-width="1.5" fill="none"/>
+          <circle cx="9" cy="28" r="4" stroke="#64B5F6" stroke-width="1.5" fill="none"/>
+          <circle cx="31" cy="28" r="4" stroke="#64B5F6" stroke-width="1.5" fill="none"/>
+          <line x1="14" y1="17" x2="9" y2="24" stroke="#4FC3F7" stroke-width="1"/>
+          <line x1="26" y1="17" x2="31" y2="24" stroke="#4FC3F7" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="proj-name">Social Media Platform</div>
+      <div class="proj-desc">Full-stack social platform supporting 2K+ concurrent users (simulated). Real-time messaging via WebSockets, friend connections, media uploads via Cloudinary, and optimized React state management.</div>
+      <div class="proj-techs">
+        <span class="ptech">React.js</span>
+        <span class="ptech">Node.js</span>
+        <span class="ptech">MongoDB</span>
+        <span class="ptech">Socket.IO</span>
+        <span class="ptech">Cloudinary</span>
+        <span class="ptech">Firebase</span>
+      </div>
+    </div>
+
+    <!-- Emission Detection -->
+    <div class="proj-card reveal">
+      <div class="proj-number">04</div>
+      <div class="proj-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="4" fill="rgba(239,154,154,0.1)"/>
+          <circle cx="20" cy="20" r="10" stroke="#EF9A9A" stroke-width="1.5" fill="none"/>
+          <circle cx="20" cy="20" r="5" fill="rgba(239,154,154,0.3)"/>
+          <line x1="20" y1="6" x2="20" y2="10" stroke="#EF9A9A" stroke-width="1.5"/>
+          <line x1="20" y1="30" x2="20" y2="34" stroke="#EF9A9A" stroke-width="1.5"/>
+          <line x1="6" y1="20" x2="10" y2="20" stroke="#EF9A9A" stroke-width="1.5"/>
+          <line x1="30" y1="20" x2="34" y2="20" stroke="#EF9A9A" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="proj-name">Emission Detection</div>
+      <div class="proj-desc">Computer vision system detecting vehicle emissions in real-time via camera feed. CNN model analyzes smoke density, estimates carbon levels, auto-captures license plates when thresholds are exceeded.</div>
+      <div class="proj-techs">
+        <span class="ptech">CNN</span>
+        <span class="ptech">Python3</span>
+        <span class="ptech">Computer Vision</span>
+        <span class="ptech">OpenCV</span>
+      </div>
+    </div>
+
+    <!-- BGBT -->
+    <div class="proj-card reveal">
+      <div class="proj-number">05</div>
+      <div class="proj-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="4" fill="rgba(79,195,247,0.08)"/>
+          <rect x="7" y="10" width="26" height="20" rx="2" fill="none" stroke="#4FC3F7" stroke-width="1.5"/>
+          <rect x="12" y="14" width="7" height="7" rx="1" fill="rgba(79,195,247,0.4)"/>
+          <rect x="21" y="14" width="7" height="3" rx="1" fill="rgba(79,195,247,0.3)"/>
+          <rect x="21" y="19" width="5" height="2" rx="1" fill="rgba(79,195,247,0.2)"/>
+          <rect x="12" y="24" width="16" height="2" rx="1" fill="rgba(79,195,247,0.2)"/>
+        </svg>
+      </div>
+      <div class="proj-name">BGBT E-Commerce</div>
+      <div class="proj-desc">Modern e-commerce platform with intuitive UI/UX. Deployed frontend + backend on Render with PostgreSQL. Secure REST APIs for product, category, and order management.</div>
+      <div class="proj-techs">
+        <span class="ptech">EJS</span>
+        <span class="ptech">Node.js</span>
+        <span class="ptech">Express.js</span>
+        <span class="ptech">PostgreSQL</span>
+        <span class="ptech">REST API</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== EXPERIENCE ===================== -->
+<section id="experience">
+  <p class="section-label reveal">// career.history</p>
+  <h2 class="section-title reveal">Experience</h2>
+  <div class="section-line reveal"></div>
+  <div class="exp-card reveal px-border">
+    <div class="exp-header">
+      <div>
+        <div class="exp-role">React Developer Intern</div>
+        <div class="exp-company">Vizion Systems · UK & India</div>
+      </div>
+      <div class="exp-badge">Jun 2025 – May 2026</div>
+    </div>
+    <ul class="exp-points">
+      <li>Built reusable React components using hooks to improve performance and maintainability across production environments.</li>
+      <li>Managed global state with Redux and optimized client-side persistence using local storage strategies.</li>
+      <li>Integrated RESTful APIs with full CRUD operations for seamless frontend-backend data flow.</li>
+      <li>Contributed to <strong style="color:var(--mc-blue)">55+ pull requests</strong>, supporting feature releases and code quality improvements.</li>
+      <li>Used Git/GitHub following standard branching practices in an Agile team environment.</li>
+      <li>Collaborated to enhance UI consistency, fix bugs, and improve overall application stability.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== EDUCATION ===================== -->
+<section id="education">
+  <p class="section-label reveal">// education.load()</p>
+  <h2 class="section-title reveal">Education</h2>
+  <div class="section-line reveal"></div>
+  <div class="edu-card reveal px-border">
+    <div class="edu-pixel-icon">🎓</div>
+    <div>
+      <div class="edu-name">JSS Academy of Technical Education</div>
+      <div class="edu-deg">B.E. in Computer Science & Engineering — Bengaluru</div>
+      <div class="edu-info">
+        <span class="edu-pill">Sep 2022 – Jun 2026</span>
+        <span class="edu-pill">CGPA: 8.5 / 10</span>
+      </div>
+    </div>
+  </div>
+  <div class="courses-grid reveal">
+    <div class="course-item">Full Stack Web Development — Udemy</div>
+    <div class="course-item">Java OOP with Exercises 2025 — Udemy</div>
+    <div class="course-item">React Complete Guide (Next.js, Redux) — Udemy</div>
+    <div class="course-item">Spring Boot 3 & Spring AI — Udemy</div>
+    <div class="course-item">Strivers A2Z DSA — YouTube</div>
+    <div class="course-item">Machine Learning for Engineering — NPTEL</div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact">
+  <p class="section-label reveal">// contact.init()</p>
+  <h2 class="section-title reveal">Get In Touch</h2>
+  <div class="section-line reveal"></div>
+  <p class="reveal" style="color:var(--text-mute);max-width:500px;line-height:1.7;font-size:1.05rem">
+    Currently open to internship extensions, full-time roles, and exciting freelance projects. 
+    Let's build something together.
+  </p>
+  <div class="contact-grid reveal">
+    <a href="mailto:rvikas549@gmail.com" class="contact-link">
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+      rvikas549@gmail.com
+    </a>
+    <a href="https://github.com/rvikas549" target="_blank" class="contact-link">
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      GitHub
+    </a>
+    <a href="https://www.linkedin.com/in/vikas-r-7a6b88251/" target="_blank" class="contact-link">
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      LinkedIn
+    </a>
+    <a href="tel:+919844132993" class="contact-link">
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.41a2 2 0 0 1 2-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      +91 98441 32993
+    </a>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <p>Designed & Built by <span>Vikas R</span> · <span>2025</span> · All Blocks Reserved <span>🦕</span></p>
+  <p style="margin-top:.5rem;opacity:.4">// Made with React instincts in pure HTML+JS+Three.js</p>
+</footer>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+/* ---- CUSTOM CURSOR ---- */
+const cur=document.getElementById('cursor');
+const dot=document.getElementById('cursor-dot');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=(e.clientX-10)+'px';
+  cur.style.top=(e.clientY-10)+'px';
+  dot.style.left=e.clientX+'px';
+  dot.style.top=e.clientY+'px';
+});
+
+/* ---- THREE.JS 3D SCENE ---- */
+const canvas=document.getElementById('three-canvas');
+const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
+camera.position.set(0,0,30);
+
+/* Minecraft floating cubes */
+const cubeGroup=new THREE.Group();
+const cubeColors=[0x4FC3F7,0x66BB6A,0x9E9E9E,0x8D6E63,0x64B5F6,0xB2DFDB];
+const cubeCount=40;
+const cubes=[];
+for(let i=0;i<cubeCount;i++){
+  const s=Math.random()*1.5+0.4;
+  const geo=new THREE.BoxGeometry(s,s,s);
+  const mat=new THREE.MeshStandardMaterial({
+    color:cubeColors[Math.floor(Math.random()*cubeColors.length)],
+    metalness:.1,roughness:.6,
+    transparent:true,opacity:Math.random()*0.5+0.2
+  });
+  const cube=new THREE.Mesh(geo,mat);
+  cube.position.set(
+    (Math.random()-0.5)*80,
+    (Math.random()-0.5)*60,
+    (Math.random()-0.5)*40
+  );
+  cube.userData={
+    rx:Math.random()*0.02-0.01,
+    ry:Math.random()*0.02-0.01,
+    rz:Math.random()*0.01,
+    floatSpeed:Math.random()*0.008+0.003,
+    floatOffset:Math.random()*Math.PI*2
+  };
+  cubes.push(cube);
+  cubeGroup.add(cube);
+}
+scene.add(cubeGroup);
+
+/* Dino-themed wireframe T-Rex silhouettes */
+const dinoColor=new THREE.Color(0x535353);
+const dinoPositions=[
+  {x:-25,y:-8,z:5,scale:1.4},
+  {x:22,y:6,z:-8,scale:1.1},
+  {x:0,y:-15,z:-15,scale:2}
+];
+
+function makePixelDino(x,y,z,s){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshStandardMaterial({color:0x4FC3F7,metalness:.2,roughness:.5,transparent:true,opacity:.25});
+  const wiremat=new THREE.MeshBasicMaterial({color:0x4FC3F7,wireframe:true,transparent:true,opacity:.15});
+  const parts=[
+    {w:2,h:2.5,d:1.5,px:0,py:1.25,pz:0},  // body
+    {w:1.5,h:1.5,d:1.2,px:.2,py:3.2,pz:0}, // head
+    {w:.5,h:1.2,d:.6,px:-1.2,py:.8,pz:0},  // tail
+    {w:.4,h:1.8,d:.5,px:.8,py:.2,pz:0},    // leg R
+    {w:.4,h:1.8,d:.5,px:.1,py:.2,pz:0},    // leg L
+    {w:.3,h:.8,d:.3,px:1.1,py:2.5,pz:.3},  // arm R
+    {w:.3,h:.8,d:.3,px:-.3,py:2.5,pz:.3},  // arm L
+  ];
+  parts.forEach(p=>{
+    const geo=new THREE.BoxGeometry(p.w*s,p.h*s,p.d*s);
+    const m=new THREE.Mesh(geo,wiremat);
+    m.position.set(p.px*s+x,p.py*s+y,p.pz*s+z);
+    g.add(m);
+  });
+  return g;
+}
+
+dinoPositions.forEach(d=>{
+  const dino=makePixelDino(d.x,d.y,d.z,d.scale);
+  dino.userData={
+    rx:0.002,ry:0.003,rz:0.001,
+    baseY:d.y,
+    floatOffset:Math.random()*Math.PI*2
+  };
+  scene.add(dino);
+  cubes.push({mesh:dino,isDino:true,...dino.userData});
+});
+
+/* Lighting */
+const ambL=new THREE.AmbientLight(0x87CEEB,.4);
+scene.add(ambL);
+const ptL=new THREE.PointLight(0x4FC3F7,1.5,80);
+ptL.position.set(10,20,10);
+scene.add(ptL);
+const ptL2=new THREE.PointLight(0x66BB6A,1,60);
+ptL2.position.set(-15,-10,5);
+scene.add(ptL2);
+
+/* Particles (stars) */
+const pGeo=new THREE.BufferGeometry();
+const pCount=300;
+const pPos=new Float32Array(pCount*3);
+for(let i=0;i<pCount*3;i++){pPos[i]=(Math.random()-0.5)*200}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+const pMat=new THREE.PointsMaterial({color:0x4FC3F7,size:.3,transparent:true,opacity:.5});
+const pts=new THREE.Points(pGeo,pMat);
+scene.add(pts);
+
+/* Mouse parallax */
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=(e.clientX/window.innerWidth-.5)*2;
+  mouseY=-(e.clientY/window.innerHeight-.5)*2;
+});
+
+/* Animate */
+let clock=0;
+function animate(){
+  requestAnimationFrame(animate);
+  clock+=0.016;
+  
+  cubes.forEach((c,i)=>{
+    if(c.isDino||!c.mesh){return}
+    c.rotation=(c.rotation||0);
+    const obj=cubeGroup.children[i];
+    if(obj){
+      obj.rotation.x+=c.rx;
+      obj.rotation.y+=c.ry;
+      obj.rotation.z+=c.rz;
+      obj.position.y+=Math.sin(clock*c.floatSpeed+c.floatOffset)*0.02;
+    }
+  });
+  
+  cubeGroup.rotation.y+=0.0008;
+  pts.rotation.y+=0.0003;
+  
+  camera.position.x+=(mouseX*4-camera.position.x)*.03;
+  camera.position.y+=(mouseY*3-camera.position.y)*.03;
+  camera.lookAt(0,0,0);
+  
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+/* ---- SCROLL REVEAL ---- */
+const reveals=document.querySelectorAll('.reveal');
+const io=new IntersectionObserver(entries=>{
+  entries.forEach((e,idx)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'),idx*80);
+    }
+  });
+},{threshold:.1});
+reveals.forEach(r=>io.observe(r));
+
+/* ---- SKILL BAR ANIMATION ---- */
+const barIO=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('.skill-bar-fill').forEach(bar=>{
+        const w=bar.dataset.width;
+        bar.style.width=w+'%';
+      });
+    }
+  });
+},{threshold:.3});
+const skillSec=document.getElementById('about');
+if(skillSec)barIO.observe(skillSec);
+
+/* ---- DINO GAME STRIP ---- */
+(function(){
+  const strip=document.getElementById('dino-strip');
+  
+  /* Running dino SVG */
+  let dinoX=0;
+  const runnerDiv=document.createElement('div');
+  runnerDiv.style.cssText='position:absolute;bottom:30px;left:0;pointer-events:none;transition:none;';
+  let legToggle=false;
+  function dinoSVG(leg){
+    return`<svg width="70" height="65" viewBox="0 0 70 65" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+      <!-- Body -->
+      <rect x="20" y="18" width="30" height="22" fill="#535353"/>
+      <!-- Head -->
+      <rect x="36" y="6" width="22" height="16" fill="#535353"/>
+      <!-- Eye -->
+      <rect x="50" y="9" width="5" height="5" fill="white"/>
+      <rect x="52" y="10" width="3" height="3" fill="#1a1a1a"/>
+      <!-- Jaw -->
+      <rect x="52" y="19" width="12" height="5" fill="#535353"/>
+      <!-- Tail -->
+      <rect x="4" y="24" width="18" height="10" fill="#535353"/>
+      <rect x="0" y="28" width="8" height="6" fill="#535353"/>
+      <!-- Arms -->
+      <rect x="44" y="28" width="8" height="6" fill="#535353"/>
+      <!-- Legs -->
+      ${leg?
+        '<rect x="26" y="40" width="8" height="18" fill="#535353"/><rect x="20" y="52" width="10" height="6" fill="#535353"/><rect x="38" y="40" width="8" height="12" fill="#535353"/><rect x="34" y="46" width="10" height="6" fill="#535353"/>'
+        :'<rect x="26" y="40" width="8" height="12" fill="#535353"/><rect x="20" y="46" width="10" height="6" fill="#535353"/><rect x="38" y="40" width="8" height="18" fill="#535353"/><rect x="34" y="52" width="10" height="6" fill="#535353"/>'}
+    </svg>`;
+  }
+  runnerDiv.innerHTML=dinoSVG(false);
+  strip.appendChild(runnerDiv);
+  
+  /* Cacti */
+  const cactusPositions=[0.7,1.5];
+  const cacti=cactusPositions.map((pos,i)=>{
+    const c=document.createElement('div');
+    c.style.cssText=`position:absolute;bottom:30px;right:${pos*100}%;pointer-events:none;`;
+    c.innerHTML=`<svg width="30" height="45" viewBox="0 0 30 45" style="image-rendering:pixelated">
+      <rect x="10" y="0" width="10" height="45" fill="#4CAF50"/>
+      <rect x="0" y="15" width="10" height="8" fill="#4CAF50"/>
+      <rect x="20" y="20" width="10" height="8" fill="#4CAF50"/>
+    </svg>`;
+    strip.appendChild(c);
+    return c;
+  });
+  
+  /* Clouds */
+  [300,700,1100].forEach(pos=>{
+    const cl=document.createElement('div');
+    cl.style.cssText=`position:absolute;top:10px;left:${pos}px;animation:cloudMove 20s linear infinite;`;
+    cl.innerHTML=`<svg width="60" height="20" viewBox="0 0 60 20" style="image-rendering:pixelated">
+      <rect x="10" y="8" width="40" height="8" fill="#3a3a3a"/>
+      <rect x="20" y="0" width="20" height="10" fill="#3a3a3a"/>
+    </svg>`;
+    strip.appendChild(cl);
+  });
+  
+  const style=document.createElement('style');
+  style.textContent='@keyframes cloudMove{from{transform:translateX(0)}to{transform:translateX(-1400px)}}';
+  document.head.appendChild(style);
+  
+  let x=50;
+  let cactX=[window.innerWidth*0.7, window.innerWidth*1.5];
+  const speed=180;
+  let last=performance.now();
+  let frame=0;
+  
+  function loop(now){
+    const dt=(now-last)/1000;
+    last=now;
+    frame++;
+    if(frame%8===0){
+      legToggle=!legToggle;
+      runnerDiv.innerHTML=dinoSVG(legToggle);
+    }
+    x+=speed*dt;
+    if(x>window.innerWidth+100)x=-100;
+    runnerDiv.style.left=x+'px';
+    
+    cactX=cactX.map((cx,i)=>{
+      cx-=speed*dt;
+      if(cx<-50)cx=window.innerWidth+Math.random()*400+200;
+      cacti[i].style.left=cx+'px';
+      return cx;
+    });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* ---- FLOATING MC CUBES (DOM) ---- */
+(function(){
+  const colors=['#4FC3F7','#66BB6A','#9E9E9E','#8D6E63','#64B5F6'];
+  for(let i=0;i<12;i++){
+    const cube=document.createElement('div');
+    const size=Math.random()*24+12;
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const left=Math.random()*100;
+    const dur=Math.random()*20+15;
+    const delay=-Math.random()*20;
+    const pixelSize=Math.round(size);
+    
+    cube.style.cssText=`
+      position:fixed;
+      left:${left}%;
+      width:${pixelSize}px;height:${pixelSize}px;
+      background:${color};
+      opacity:.12;
+      z-index:3;
+      pointer-events:none;
+      image-rendering:pixelated;
+      animation:cubeFloat ${dur}s ${delay}s linear infinite;
+      box-shadow:inset 0 0 ${pixelSize*.3}px rgba(255,255,255,.3),inset ${pixelSize*.2}px 0 ${pixelSize*.2}px rgba(0,0,0,.2);
+    `;
+    document.body.appendChild(cube);
+  }
+})();
+
+/* ---- PIXEL CLICK EFFECT ---- */
+document.addEventListener('click',e=>{
+  const sparks=['◆','■','▲','●','★','▪'];
+  for(let i=0;i<6;i++){
+    const sp=document.createElement('span');
+    sp.textContent=sparks[Math.floor(Math.random()*sparks.length)];
+    sp.style.cssText=`
+      position:fixed;left:${e.clientX}px;top:${e.clientY}px;
+      color:#4FC3F7;font-size:${Math.random()*12+8}px;
+      pointer-events:none;z-index:99999;
+      animation:sparkFly .6s ease forwards;
+      transform:translate(-50%,-50%);
+    `;
+    const angle=Math.random()*360;
+    const dist=Math.random()*60+30;
+    const keyframes=`@keyframes sparkFly{
+      from{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1)}
+      to{opacity:0;transform:translate(-50%,-50%) translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px) scale(0)}
+    }`;
+    const sty=document.createElement('style');
+    sty.textContent=keyframes;
+    document.head.appendChild(sty);
+    document.body.appendChild(sp);
+    setTimeout(()=>{sp.remove();sty.remove()},600);
+  }
+});
+
+/* ---- TYPING EFFECT IN HERO NAME ---- */
+(function(){
+  const tag=document.querySelector('.hero-tag');
+  if(!tag)return;
+  const txt='// Full Stack Developer';
+  tag.textContent='';
+  let i=0;
+  const t=setInterval(()=>{
+    tag.textContent=txt.slice(0,++i);
+    if(i>=txt.length)clearInterval(t);
+  },60);
+})();
+
+/* ---- NAV ACTIVE STATE ---- */
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{
+    if(window.scrollY>=s.offsetTop-200)cur=s.id;
+  });
+  navLinks.forEach(a=>{
+    a.style.color=a.getAttribute('href')==='#'+cur?'var(--mc-blue)':'';
+  });
+},{passive:true});
+
+/* ---- SMOOTH NAV SCROLL ---- */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const target=document.querySelector(a.getAttribute('href'));
+    if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth'})}
+  });
+});
+</script>
+</body>
+</html>
