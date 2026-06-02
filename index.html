@@ -1,667 +1,654 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vikas R — Full Stack Developer</title>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<style>
-:root{
-  --sky:#87CEEB;
-  --ground:#4a4a4a;
-  --cactus:#4CAF50;
-  --dino-gray:#535353;
-  --pixel:#1a1a1a;
-  --white:#f5f5f5;
-  --mc-blue:#4FC3F7;
-  --mc-green:#66BB6A;
-  --mc-brown:#8D6E63;
-  --mc-stone:#9E9E9E;
-  --accent:#64B5F6;
-  --text-main:#e8e8e8;
-  --text-mute:#9e9e9e;
-  --card-bg:rgba(20,20,20,0.85);
-  --border-col:rgba(100,181,246,0.3);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vikas R — Full Stack Developer</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <style>
+    :root{
+      --sky:#87CEEB;
+      --ground:#4a4a4a;
+      --cactus:#4CAF50;
+      --dino-gray:#535353;
+      --pixel:#1a1a1a;
+      --white:#f5f5f5;
+      --mc-blue:#4FC3F7;
+      --mc-green:#66BB6A;
+      --mc-brown:#8D6E63;
+      --mc-stone:#9E9E9E;
+      --accent:#64B5F6;
+      --text-main:#e8e8e8;
+      --text-mute:#9e9e9e;
+      --card-bg:rgba(20,20,20,0.85);
+      --border-col:rgba(100,181,246,0.3);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
 
-/* ===================== SCROLLBAR ===================== */
-::-webkit-scrollbar{width:8px}
-::-webkit-scrollbar-track{background:#1a1a1a}
-::-webkit-scrollbar-thumb{background:#4FC3F7;border-radius:4px}
+    /* ===================== SCROLLBAR ===================== */
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:#1a1a1a}
+    ::-webkit-scrollbar-thumb{background:#4FC3F7;border-radius:4px}
 
-/* ===================== BASE ===================== */
-body{
-  background:#0d0d0d;
-  color:var(--text-main);
-  font-family:'Rajdhani',sans-serif;
-  overflow-x:hidden;
-  cursor:none;
-}
+    /* ===================== BASE ===================== */
+    body{
+      background:#0d0d0d;
+      color:var(--text-main);
+      font-family:'Rajdhani',sans-serif;
+      overflow-x:hidden;
+      cursor:none;
+    }
 
-/* ===================== CUSTOM CURSOR ===================== */
-#cursor{
-  position:fixed;width:20px;height:20px;
-  background:transparent;border:2px solid var(--mc-blue);
-  image-rendering:pixelated;
-  pointer-events:none;z-index:99999;
-  transition:transform .1s ease;
-  clip-path:polygon(0 0,100% 0,100% 70%,70% 70%,70% 100%,0 100%);
-}
-#cursor-dot{
-  position:fixed;width:6px;height:6px;
-  background:var(--mc-blue);
-  pointer-events:none;z-index:99999;
-  transform:translate(-50%,-50%);
-}
-body:hover #cursor{transform:scale(1.2)}
+    /* ===================== CUSTOM CURSOR ===================== */
+    #cursor{
+      position:fixed;width:20px;height:20px;
+      background:transparent;border:2px solid var(--mc-blue);
+      image-rendering:pixelated;
+      pointer-events:none;z-index:99999;
+      transition:transform .1s ease;
+      clip-path:polygon(0 0,100% 0,100% 70%,70% 70%,70% 100%,0 100%);
+    }
+    #cursor-dot{
+      position:fixed;width:6px;height:6px;
+      background:var(--mc-blue);
+      pointer-events:none;z-index:99999;
+      transform:translate(-50%,-50%);
+    }
+    body:hover #cursor{transform:scale(1.2)}
 
-/* ===================== 3D CANVAS ===================== */
-#three-canvas{
-  position:fixed;top:0;left:0;
-  width:100%;height:100%;
-  pointer-events:none;
-  z-index:0;
-  opacity:.55;
-}
+    /* ===================== 3D CANVAS ===================== */
+    #three-canvas{
+      position:fixed;top:0;left:0;
+      width:100%;height:100%;
+      pointer-events:none;
+      z-index:0;
+      opacity:.55;
+    }
 
-/* ===================== NOISE OVERLAY ===================== */
-.noise{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  pointer-events:none;z-index:1;opacity:.04;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+    /* ===================== NOISE OVERLAY ===================== */
+    .noise{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      pointer-events:none;z-index:1;opacity:.04;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
 
-/* ===================== DINO GAME STRIP ===================== */
-#dino-strip{
-  position:fixed;bottom:0;left:0;right:0;
-  height:100px;z-index:10;
-  background:linear-gradient(to top,#111,transparent);
-  overflow:hidden;pointer-events:none;
-}
-#dino-ground-line{
-  position:absolute;bottom:28px;left:0;right:0;
-  height:2px;background:#4FC3F7;opacity:.4;
-}
-.cloud-pixel{
-  position:absolute;
-  background:#3a3a3a;
-  image-rendering:pixelated;
-}
+    /* ===================== DINO GAME STRIP ===================== */
+    #dino-strip{
+      position:fixed;bottom:0;left:0;right:0;
+      height:100px;z-index:10;
+      background:linear-gradient(to top,#111,transparent);
+      overflow:hidden;pointer-events:none;
+    }
+    #dino-ground-line{
+      position:absolute;bottom:28px;left:0;right:0;
+      height:2px;background:#4FC3F7;opacity:.4;
+    }
+    .cloud-pixel{
+      position:absolute;
+      background:#3a3a3a;
+      image-rendering:pixelated;
+    }
 
-/* ===================== NAV ===================== */
-nav{
-  position:fixed;top:0;left:0;right:0;
-  z-index:50;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:1rem 2rem;
-  background:rgba(10,10,10,.8);
-  border-bottom:1px solid var(--border-col);
-  backdrop-filter:blur(10px);
-}
-.nav-logo{
-  font-family:'VT323',monospace;
-  font-size:1.8rem;
-  color:var(--mc-blue);
-  text-shadow:0 0 10px rgba(79,195,247,.5);
-  letter-spacing:.05em;
-}
-.nav-logo span{color:#66BB6A}
-.nav-links{
-  display:flex;gap:1.5rem;
-  list-style:none;
-}
-.nav-links a{
-  font-family:'Share Tech Mono',monospace;
-  color:var(--text-mute);
-  text-decoration:none;
-  font-size:.85rem;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  transition:color .2s,text-shadow .2s;
-  position:relative;
-}
-.nav-links a::before{
-  content:'> ';color:var(--mc-blue);
-  opacity:0;transition:opacity .2s;
-}
-.nav-links a:hover{
-  color:var(--mc-blue);
-  text-shadow:0 0 8px rgba(79,195,247,.6);
-}
-.nav-links a:hover::before{opacity:1}
+    /* ===================== NAV ===================== */
+    nav{
+      position:fixed;top:0;left:0;right:0;
+      z-index:50;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:1rem 2rem;
+      background:rgba(10,10,10,.8);
+      border-bottom:1px solid var(--border-col);
+      backdrop-filter:blur(10px);
+    }
+    .nav-logo{
+      font-family:'VT323',monospace;
+      font-size:1.8rem;
+      color:var(--mc-blue);
+      text-shadow:0 0 10px rgba(79,195,247,.5);
+      letter-spacing:.05em;
+    }
+    .nav-logo span{color:#66BB6A}
+    .nav-links{
+      display:flex;gap:1.5rem;
+      list-style:none;
+    }
+    .nav-links a{
+      font-family:'Share Tech Mono',monospace;
+      color:var(--text-mute);
+      text-decoration:none;
+      font-size:.85rem;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      transition:color .2s,text-shadow .2s;
+      position:relative;
+    }
+    .nav-links a::before{
+      content:'> ';color:var(--mc-blue);
+      opacity:0;transition:opacity .2s;
+    }
+    .nav-links a:hover{
+      color:var(--mc-blue);
+      text-shadow:0 0 8px rgba(79,195,247,.6);
+    }
+    .nav-links a:hover::before{opacity:1}
 
-/* ===================== SECTIONS ===================== */
-section{
-  position:relative;z-index:5;
-  min-height:100vh;
-  display:flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  padding:6rem 2rem 4rem;
-}
+    /* ===================== SECTIONS ===================== */
+    section{
+      position:relative;z-index:5;
+      min-height:100vh;
+      display:flex;flex-direction:column;
+      justify-content:center;align-items:center;
+      padding:6rem 2rem 4rem;
+    }
 
-/* ===================== HERO ===================== */
-#hero{
-  text-align:center;
-  min-height:100vh;
-  background:radial-gradient(ellipse at 50% 40%,rgba(79,195,247,.08) 0%,transparent 70%);
-}
-.hero-tag{
-  font-family:'Share Tech Mono',monospace;
-  color:var(--mc-blue);font-size:.9rem;
-  letter-spacing:.2em;text-transform:uppercase;
-  margin-bottom:1rem;opacity:.8;
-  animation:fadeUp .6s ease both;
-}
-.hero-name{
-  font-family:'VT323',monospace;
-  font-size:clamp(4rem,12vw,9rem);
-  line-height:1;
-  color:var(--white);
-  text-shadow:0 0 30px rgba(79,195,247,.3),4px 4px 0 rgba(79,195,247,.15);
-  animation:fadeUp .7s ease .1s both;
-  letter-spacing:.02em;
-}
-.hero-name .accent{color:var(--mc-blue)}
-.hero-title{
-  font-size:clamp(1rem,3vw,1.6rem);
-  color:var(--mc-green);
-  font-weight:600;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  margin:.5rem 0 1.5rem;
-  animation:fadeUp .7s ease .2s both;
-}
-.hero-desc{
-  max-width:580px;
-  margin:0 auto 2.5rem;
-  color:var(--text-mute);
-  line-height:1.7;
-  font-size:1.05rem;
-  animation:fadeUp .7s ease .3s both;
-}
-.hero-btns{
-  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
-  animation:fadeUp .7s ease .4s both;
-}
-.btn-primary{
-  font-family:'Share Tech Mono',monospace;
-  background:var(--mc-blue);color:#000;
-  padding:.7rem 2rem;
-  font-size:.9rem;letter-spacing:.1em;
-  text-decoration:none;font-weight:700;
-  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-  transition:transform .15s,box-shadow .15s;
-  text-transform:uppercase;
-}
-.btn-primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(79,195,247,.4);
-}
-.btn-secondary{
-  font-family:'Share Tech Mono',monospace;
-  background:transparent;color:var(--mc-blue);
-  padding:.7rem 2rem;
-  font-size:.9rem;letter-spacing:.1em;
-  text-decoration:none;font-weight:600;
-  border:1px solid var(--mc-blue);
-  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-  transition:background .15s,transform .15s;
-  text-transform:uppercase;
-}
-.btn-secondary:hover{
-  background:rgba(79,195,247,.1);
-  transform:translateY(-2px);
-}
+    /* ===================== HERO ===================== */
+    #hero{
+      text-align:center;
+      min-height:100vh;
+      background:radial-gradient(ellipse at 50% 40%,rgba(79,195,247,.08) 0%,transparent 70%);
+    }
+    .hero-tag{
+      font-family:'Share Tech Mono',monospace;
+      color:var(--mc-blue);font-size:.9rem;
+      letter-spacing:.2em;text-transform:uppercase;
+      margin-bottom:1rem;opacity:.8;
+      animation:fadeUp .6s ease both;
+    }
+    .hero-name{
+      font-family:'VT323',monospace;
+      font-size:clamp(4rem,12vw,9rem);
+      line-height:1;
+      color:var(--white);
+      text-shadow:0 0 30px rgba(79,195,247,.3),4px 4px 0 rgba(79,195,247,.15);
+      animation:fadeUp .7s ease .1s both;
+      letter-spacing:.02em;
+    }
+    .hero-name .accent{color:var(--mc-blue)}
+    .hero-title{
+      font-size:clamp(1rem,3vw,1.6rem);
+      color:var(--mc-green);
+      font-weight:600;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+      margin:.5rem 0 1.5rem;
+      animation:fadeUp .7s ease .2s both;
+    }
+    .hero-desc{
+      max-width:580px;
+      margin:0 auto 2.5rem;
+      color:var(--text-mute);
+      line-height:1.7;
+      font-size:1.05rem;
+      animation:fadeUp .7s ease .3s both;
+    }
+    .hero-btns{
+      display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+      animation:fadeUp .7s ease .4s both;
+    }
+    .btn-primary{
+      font-family:'Share Tech Mono',monospace;
+      background:var(--mc-blue);color:#000;
+      padding:.7rem 2rem;
+      font-size:.9rem;letter-spacing:.1em;
+      text-decoration:none;font-weight:700;
+      clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+      transition:transform .15s,box-shadow .15s;
+      text-transform:uppercase;
+    }
+    .btn-primary:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(79,195,247,.4);
+    }
+    .btn-secondary{
+      font-family:'Share Tech Mono',monospace;
+      background:transparent;color:var(--mc-blue);
+      padding:.7rem 2rem;
+      font-size:.9rem;letter-spacing:.1em;
+      text-decoration:none;font-weight:600;
+      border:1px solid var(--mc-blue);
+      clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+      transition:background .15s,transform .15s;
+      text-transform:uppercase;
+    }
+    .btn-secondary:hover{
+      background:rgba(79,195,247,.1);
+      transform:translateY(-2px);
+    }
 
-/* ===================== DINO SVG ===================== */
-.dino-hero-wrap{
-  position:relative;margin:2rem auto 0;
-  width:160px;animation:dinoRun 8s linear infinite;
-}
-@keyframes dinoRun{
-  0%{transform:translateX(-200px)}
-  100%{transform:translateX(calc(100vw + 200px))}
-}
-.dino-sprite{
-  width:80px;
-  image-rendering:pixelated;
-  filter:drop-shadow(0 4px 10px rgba(79,195,247,.3));
-}
+    /* ===================== PIXEL SCROLL INDICATOR ===================== */
+    .scroll-hint{
+      position:absolute;bottom:110px;left:50%;transform:translateX(-50%);
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;color:var(--mc-green);letter-spacing:.15em;
+      text-transform:uppercase;
+      animation:blink 1.2s step-end infinite;
+      text-align:center;
+    }
+    @keyframes blink{50%{opacity:0}}
 
-/* ===================== PIXEL SCROLL INDICATOR ===================== */
-.scroll-hint{
-  position:absolute;bottom:110px;left:50%;transform:translateX(-50%);
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;color:var(--text-mute);letter-spacing:.15em;
-  text-transform:uppercase;
-  animation:blink 1.2s step-end infinite;
-}
-@keyframes blink{50%{opacity:0}}
+    /* ===================== SECTION TITLES ===================== */
+    .section-label{
+      font-family:'Share Tech Mono',monospace;
+      color:var(--mc-blue);font-size:.8rem;
+      letter-spacing:.25em;text-transform:uppercase;
+      margin-bottom:.5rem;opacity:.7;
+    }
+    .section-title{
+      font-family:'VT323',monospace;
+      font-size:clamp(2.5rem,7vw,4.5rem);
+      color:var(--white);
+      margin-bottom:.5rem;
+      text-shadow:3px 3px 0 rgba(79,195,247,.2);
+    }
+    .section-line{
+      width:60px;height:3px;
+      background:linear-gradient(90deg,var(--mc-blue),var(--mc-green));
+      margin:0 auto 3rem;
+    }
 
-/* ===================== SECTION TITLES ===================== */
-.section-label{
-  font-family:'Share Tech Mono',monospace;
-  color:var(--mc-blue);font-size:.8rem;
-  letter-spacing:.25em;text-transform:uppercase;
-  margin-bottom:.5rem;opacity:.7;
-}
-.section-title{
-  font-family:'VT323',monospace;
-  font-size:clamp(2.5rem,7vw,4.5rem);
-  color:var(--white);
-  margin-bottom:.5rem;
-  text-shadow:3px 3px 0 rgba(79,195,247,.2);
-}
-.section-line{
-  width:60px;height:3px;
-  background:linear-gradient(90deg,var(--mc-blue),var(--mc-green));
-  margin:0 auto 3rem;
-}
+    /* ===================== ABOUT ===================== */
+    #about{background:linear-gradient(180deg,transparent,rgba(79,195,247,.03) 50%,transparent)}
+    .about-grid{
+      display:grid;
+      grid-template-columns:1fr 1.5fr;
+      gap:3rem;max-width:1000px;width:100%;
+      align-items:center;
+    }
+    .mc-char-container{
+      position:relative;
+      display:flex;justify-content:center;align-items:center;
+    }
+    .mc-platform{
+      width:220px;height:220px;
+      position:relative;
+      animation:float 4s ease-in-out infinite;
+    }
+    @keyframes float{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-16px)}
+    }
 
-/* ===================== ABOUT ===================== */
-#about{background:linear-gradient(180deg,transparent,rgba(79,195,247,.03) 50%,transparent)}
-.about-grid{
-  display:grid;
-  grid-template-columns:1fr 1.5fr;
-  gap:3rem;max-width:1000px;width:100%;
-  align-items:center;
-}
-.mc-char-container{
-  position:relative;
-  display:flex;justify-content:center;align-items:center;
-}
-.mc-platform{
-  width:220px;height:220px;
-  position:relative;
-  animation:float 4s ease-in-out infinite;
-}
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-16px)}
-}
+    .about-text{text-align:left}
+    .about-text p{
+      color:var(--text-mute);line-height:1.8;
+      font-size:1.05rem;margin-bottom:1rem;
+    }
+    .about-text p strong{color:var(--mc-blue)}
+    .mc-stat-row{
+      display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;
+    }
+    .mc-stat{
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:.6rem 1.2rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:.8rem;
+      color:var(--mc-green);
+      letter-spacing:.1em;
+      clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+    }
 
-/* Minecraft Character SVG Block */
-.about-text{text-align:left}
-.about-text p{
-  color:var(--text-mute);line-height:1.8;
-  font-size:1.05rem;margin-bottom:1rem;
-}
-.about-text p strong{color:var(--mc-blue)}
-.mc-stat-row{
-  display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;
-}
-.mc-stat{
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:.6rem 1.2rem;
-  font-family:'Share Tech Mono',monospace;
-  font-size:.8rem;
-  color:var(--mc-green);
-  letter-spacing:.1em;
-  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
-}
+    /* ===================== SKILLS ===================== */
+    #skills{background:rgba(0,0,0,.3)}
+    .skills-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:1.2rem;
+      max-width:1000px;width:100%;
+    }
+    .skill-block{
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:1.4rem 1.2rem;
+      position:relative;
+      overflow:hidden;
+      transition:transform .2s,border-color .2s;
+    }
+    .skill-block:hover{
+      transform:translateY(-4px);
+      border-color:rgba(79,195,247,.7);
+    }
+    .skill-block::before{
+      content:'';
+      position:absolute;top:0;left:0;
+      width:3px;height:100%;
+      background:linear-gradient(180deg,var(--mc-blue),var(--mc-green));
+    }
+    .skill-cat{
+      font-family:'Share Tech Mono',monospace;
+      font-size:.7rem;color:var(--text-mute);
+      letter-spacing:.2em;text-transform:uppercase;
+      margin-bottom:.7rem;
+    }
+    .skill-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+    .stag{
+      background:rgba(79,195,247,.08);
+      border:1px solid rgba(79,195,247,.2);
+      padding:.25rem .6rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;color:var(--accent);
+      transition:background .2s;
+    }
+    .stag:hover{background:rgba(79,195,247,.2)}
 
-/* ===================== SKILLS ===================== */
-#skills{background:rgba(0,0,0,.3)}
-.skills-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:1.2rem;
-  max-width:1000px;width:100%;
-}
-.skill-block{
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:1.4rem 1.2rem;
-  position:relative;
-  overflow:hidden;
-  transition:transform .2s,border-color .2s;
-}
-.skill-block:hover{
-  transform:translateY(-4px);
-  border-color:rgba(79,195,247,.7);
-}
-.skill-block::before{
-  content:'';
-  position:absolute;top:0;left:0;
-  width:3px;height:100%;
-  background:linear-gradient(180deg,var(--mc-blue),var(--mc-green));
-}
-.skill-cat{
-  font-family:'Share Tech Mono',monospace;
-  font-size:.7rem;color:var(--text-mute);
-  letter-spacing:.2em;text-transform:uppercase;
-  margin-bottom:.7rem;
-}
-.skill-tags{display:flex;flex-wrap:wrap;gap:.5rem}
-.stag{
-  background:rgba(79,195,247,.08);
-  border:1px solid rgba(79,195,247,.2);
-  padding:.25rem .6rem;
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;color:var(--accent);
-  transition:background .2s;
-}
-.stag:hover{background:rgba(79,195,247,.2)}
+    /* ===================== PROJECTS ===================== */
+    #projects{background:linear-gradient(180deg,transparent,rgba(102,187,106,.03) 50%,transparent)}
+    .projects-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:1.8rem;max-width:1100px;width:100%;
+    }
+    .proj-card{
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:1.8rem;
+      position:relative;
+      overflow:hidden;
+      transition:transform .25s,border-color .25s,box-shadow .25s;
+      cursor:pointer;
+    }
+    .proj-card:hover{
+      transform:translateY(-8px) scale(1.01);
+      border-color:rgba(79,195,247,.6);
+      box-shadow:0 20px 50px rgba(79,195,247,.1),inset 0 0 60px rgba(79,195,247,.03);
+    }
+    .proj-card::after{
+      content:'';
+      position:absolute;
+      top:0;left:-100%;width:100%;height:2px;
+      background:linear-gradient(90deg,transparent,var(--mc-blue),var(--mc-green),transparent);
+      transition:left .4s ease;
+    }
+    .proj-card:hover::after{left:100%}
+    .proj-number{
+      font-family:'VT323',monospace;
+      font-size:3.5rem;color:rgba(79,195,247,.08);
+      position:absolute;top:.5rem;right:1rem;
+      line-height:1;pointer-events:none;
+    }
+    .proj-icon{
+      width:40px;height:40px;margin-bottom:1rem;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .proj-name{
+      font-family:'Rajdhani',sans-serif;
+      font-weight:700;font-size:1.3rem;
+      color:var(--white);margin-bottom:.4rem;
+    }
+    .proj-desc{
+      color:var(--text-mute);
+      font-size:.95rem;line-height:1.6;
+      margin-bottom:1.2rem;
+    }
+    .proj-techs{display:flex;flex-wrap:wrap;gap:.4rem}
+    .ptech{
+      background:rgba(102,187,106,.08);
+      border:1px solid rgba(102,187,106,.25);
+      padding:.2rem .55rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:.7rem;color:var(--mc-green);
+    }
 
-/* ===================== PROJECTS ===================== */
-#projects{background:linear-gradient(180deg,transparent,rgba(102,187,106,.03) 50%,transparent)}
-.projects-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-  gap:1.8rem;max-width:1100px;width:100%;
-}
-.proj-card{
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:1.8rem;
-  position:relative;
-  overflow:hidden;
-  transition:transform .25s,border-color .25s,box-shadow .25s;
-  cursor:pointer;
-}
-.proj-card:hover{
-  transform:translateY(-8px) scale(1.01);
-  border-color:rgba(79,195,247,.6);
-  box-shadow:0 20px 50px rgba(79,195,247,.1),inset 0 0 60px rgba(79,195,247,.03);
-}
-.proj-card::after{
-  content:'';
-  position:absolute;
-  top:0;left:-100%;width:100%;height:2px;
-  background:linear-gradient(90deg,transparent,var(--mc-blue),var(--mc-green),transparent);
-  transition:left .4s ease;
-}
-.proj-card:hover::after{left:100%}
-.proj-number{
-  font-family:'VT323',monospace;
-  font-size:3.5rem;color:rgba(79,195,247,.08);
-  position:absolute;top:.5rem;right:1rem;
-  line-height:1;pointer-events:none;
-}
-.proj-icon{
-  width:40px;height:40px;margin-bottom:1rem;
-  display:flex;align-items:center;justify-content:center;
-}
-.proj-name{
-  font-family:'Rajdhani',sans-serif;
-  font-weight:700;font-size:1.3rem;
-  color:var(--white);margin-bottom:.4rem;
-}
-.proj-desc{
-  color:var(--text-mute);
-  font-size:.95rem;line-height:1.6;
-  margin-bottom:1.2rem;
-}
-.proj-techs{display:flex;flex-wrap:wrap;gap:.4rem}
-.ptech{
-  background:rgba(102,187,106,.08);
-  border:1px solid rgba(102,187,106,.25);
-  padding:.2rem .55rem;
-  font-family:'Share Tech Mono',monospace;
-  font-size:.7rem;color:var(--mc-green);
-}
+    /* ===================== EXPERIENCE ===================== */
+    #experience{background:rgba(0,0,0,.2)}
+    .exp-card{
+      max-width:800px;width:100%;
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:2.5rem;
+      position:relative;
+      overflow:hidden;
+    }
+    .exp-card::before{
+      content:'';position:absolute;
+      top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--mc-blue),var(--mc-green),var(--mc-blue));
+    }
+    .exp-header{
+      display:flex;justify-content:space-between;
+      align-items:flex-start;gap:1rem;flex-wrap:wrap;
+      margin-bottom:1.5rem;
+    }
+    .exp-role{
+      font-family:'Rajdhani',sans-serif;
+      font-weight:700;font-size:1.5rem;
+      color:var(--white);
+    }
+    .exp-company{
+      color:var(--mc-blue);font-size:1rem;
+      font-family:'Share Tech Mono',monospace;
+      letter-spacing:.05em;
+    }
+    .exp-badge{
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;
+      background:rgba(79,195,247,.1);
+      border:1px solid rgba(79,195,247,.3);
+      color:var(--mc-blue);
+      padding:.3rem .8rem;
+      white-space:nowrap;
+    }
+    .exp-points{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+    .exp-points li{
+      color:var(--text-mute);
+      font-size:.95rem;line-height:1.6;
+      padding-left:1.5rem;position:relative;
+    }
+    .exp-points li::before{
+      content:'▸';
+      position:absolute;left:0;
+      color:var(--mc-green);
+    }
 
-/* ===================== EXPERIENCE ===================== */
-#experience{background:rgba(0,0,0,.2)}
-.exp-card{
-  max-width:800px;width:100%;
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:2.5rem;
-  position:relative;
-  overflow:hidden;
-}
-.exp-card::before{
-  content:'';position:absolute;
-  top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--mc-blue),var(--mc-green),var(--mc-blue));
-}
-.exp-header{
-  display:flex;justify-content:space-between;
-  align-items:flex-start;gap:1rem;flex-wrap:wrap;
-  margin-bottom:1.5rem;
-}
-.exp-role{
-  font-family:'Rajdhani',sans-serif;
-  font-weight:700;font-size:1.5rem;
-  color:var(--white);
-}
-.exp-company{
-  color:var(--mc-blue);font-size:1rem;
-  font-family:'Share Tech Mono',monospace;
-  letter-spacing:.05em;
-}
-.exp-badge{
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;
-  background:rgba(79,195,247,.1);
-  border:1px solid rgba(79,195,247,.3);
-  color:var(--mc-blue);
-  padding:.3rem .8rem;
-  white-space:nowrap;
-}
-.exp-points{list-style:none;display:flex;flex-direction:column;gap:.75rem}
-.exp-points li{
-  color:var(--text-mute);
-  font-size:.95rem;line-height:1.6;
-  padding-left:1.5rem;position:relative;
-}
-.exp-points li::before{
-  content:'▸';
-  position:absolute;left:0;
-  color:var(--mc-green);
-}
+    /* ===================== EDUCATION ===================== */
+    #education{background:linear-gradient(180deg,transparent,rgba(79,195,247,.03) 50%,transparent)}
+    .edu-card{
+      max-width:700px;width:100%;
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:2rem;
+      display:grid;grid-template-columns:auto 1fr;gap:1.5rem;
+      align-items:center;
+    }
+    .edu-pixel-icon{
+      width:70px;height:70px;
+      background:rgba(79,195,247,.1);
+      border:2px solid var(--mc-blue);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'VT323',monospace;font-size:2rem;
+      color:var(--mc-blue);
+      flex-shrink:0;
+    }
+    .edu-name{font-weight:700;font-size:1.2rem;color:var(--white);margin-bottom:.3rem}
+    .edu-deg{color:var(--mc-blue);font-family:'Share Tech Mono',monospace;font-size:.85rem;letter-spacing:.05em}
+    .edu-info{
+      display:flex;gap:1.5rem;flex-wrap:wrap;
+      margin-top:.8rem;
+    }
+    .edu-pill{
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;color:var(--mc-green);
+      background:rgba(102,187,106,.08);
+      border:1px solid rgba(102,187,106,.25);
+      padding:.25rem .7rem;
+    }
 
-/* ===================== EDUCATION ===================== */
-#education{background:linear-gradient(180deg,transparent,rgba(79,195,247,.03) 50%,transparent)}
-.edu-card{
-  max-width:700px;width:100%;
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:2rem;
-  display:grid;grid-template-columns:auto 1fr;gap:1.5rem;
-  align-items:center;
-}
-.edu-pixel-icon{
-  width:70px;height:70px;
-  background:rgba(79,195,247,.1);
-  border:2px solid var(--mc-blue);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'VT323',monospace;font-size:2rem;
-  color:var(--mc-blue);
-  flex-shrink:0;
-}
-.edu-name{font-weight:700;font-size:1.2rem;color:var(--white);margin-bottom:.3rem}
-.edu-deg{color:var(--mc-blue);font-family:'Share Tech Mono',monospace;font-size:.85rem;letter-spacing:.05em}
-.edu-info{
-  display:flex;gap:1.5rem;flex-wrap:wrap;
-  margin-top:.8rem;
-}
-.edu-pill{
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;color:var(--mc-green);
-  background:rgba(102,187,106,.08);
-  border:1px solid rgba(102,187,106,.25);
-  padding:.25rem .7rem;
-}
+    /* ===================== COURSES ===================== */
+    .courses-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:1rem;max-width:800px;width:100%;
+      margin-top:2rem;
+    }
+    .course-item{
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:1rem 1.2rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:.78rem;color:var(--text-mute);
+      letter-spacing:.05em;
+      transition:border-color .2s,color .2s;
+    }
+    .course-item:hover{border-color:rgba(79,195,247,.5);color:var(--mc-blue)}
+    .course-item::before{content:'📚 ';font-family:sans-serif}
 
-/* ===================== COURSES ===================== */
-.courses-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1rem;max-width:800px;width:100%;
-  margin-top:2rem;
-}
-.course-item{
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:1rem 1.2rem;
-  font-family:'Share Tech Mono',monospace;
-  font-size:.78rem;color:var(--text-mute);
-  letter-spacing:.05em;
-  transition:border-color .2s,color .2s;
-}
-.course-item:hover{border-color:rgba(79,195,247,.5);color:var(--mc-blue)}
-.course-item::before{content:'📚 ';font-family:sans-serif}
+    /* ===================== CONTACT ===================== */
+    #contact{text-align:center}
+    .contact-grid{
+      display:flex;flex-wrap:wrap;
+      gap:1.2rem;justify-content:center;
+      max-width:700px;margin-top:2rem;
+    }
+    .contact-link{
+      display:flex;align-items:center;gap:.75rem;
+      background:var(--card-bg);
+      border:1px solid var(--border-col);
+      padding:1rem 1.8rem;
+      text-decoration:none;
+      color:var(--text-main);
+      font-family:'Share Tech Mono',monospace;
+      font-size:.85rem;letter-spacing:.08em;
+      transition:transform .2s,border-color .2s,color .2s;
+      clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+    }
+    .contact-link:hover{
+      transform:translateY(-4px);
+      border-color:rgba(79,195,247,.7);
+      color:var(--mc-blue);
+    }
+    .c-icon{width:22px;height:22px;opacity:.7}
 
-/* ===================== CONTACT ===================== */
-#contact{text-align:center}
-.contact-grid{
-  display:flex;flex-wrap:wrap;
-  gap:1.2rem;justify-content:center;
-  max-width:700px;margin-top:2rem;
-}
-.contact-link{
-  display:flex;align-items:center;gap:.75rem;
-  background:var(--card-bg);
-  border:1px solid var(--border-col);
-  padding:1rem 1.8rem;
-  text-decoration:none;
-  color:var(--text-main);
-  font-family:'Share Tech Mono',monospace;
-  font-size:.85rem;letter-spacing:.08em;
-  transition:transform .2s,border-color .2s,color .2s;
-  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
-}
-.contact-link:hover{
-  transform:translateY(-4px);
-  border-color:rgba(79,195,247,.7);
-  color:var(--mc-blue);
-}
-.c-icon{width:22px;height:22px;opacity:.7}
+    /* ===================== FOOTER ===================== */
+    footer{
+      position:relative;z-index:5;
+      text-align:center;
+      padding:2rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;
+      color:var(--text-mute);
+      border-top:1px solid var(--border-col);
+      letter-spacing:.1em;
+    }
+    footer span{color:var(--mc-green)}
 
-/* ===================== FOOTER ===================== */
-footer{
-  position:relative;z-index:5;
-  text-align:center;
-  padding:2rem;
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;
-  color:var(--text-mute);
-  border-top:1px solid var(--border-col);
-  letter-spacing:.1em;
-}
-footer span{color:var(--mc-green)}
+    /* ===================== MINECRAFT FLOATING CUBES ===================== */
+    .mc-cube{
+      position:fixed;
+      image-rendering:pixelated;
+      pointer-events:none;
+      z-index:3;
+      opacity:.6;
+      animation:cubeFloat linear infinite;
+    }
+    @keyframes cubeFloat{
+      0%{transform:translateY(100vh) rotate(0deg)}
+      100%{transform:translateY(-120px) rotate(720deg)}
+    }
 
-/* ===================== MINECRAFT FLOATING CUBES ===================== */
-.mc-cube{
-  position:fixed;
-  image-rendering:pixelated;
-  pointer-events:none;
-  z-index:3;
-  opacity:.6;
-  animation:cubeFloat linear infinite;
-}
-@keyframes cubeFloat{
-  0%{transform:translateY(100vh) rotate(0deg)}
-  100%{transform:translateY(-120px) rotate(720deg)}
-}
+    /* ===================== PARALLAX STARS ===================== */
+    #stars-canvas{
+      position:fixed;top:0;left:0;
+      width:100%;height:100%;
+      pointer-events:none;z-index:2;
+      opacity:.5;
+    }
 
-/* ===================== PARALLAX STARS ===================== */
-#stars-canvas{
-  position:fixed;top:0;left:0;
-  width:100%;height:100%;
-  pointer-events:none;z-index:2;
-  opacity:.5;
-}
+    /* ===================== ANIMATIONS ===================== */
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(24px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .reveal{
+      opacity:0;transform:translateY(30px);
+      transition:opacity .6s ease,transform .6s ease;
+    }
+    .reveal.visible{opacity:1;transform:translateY(0)}
 
-/* ===================== ANIMATIONS ===================== */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(24px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.reveal{
-  opacity:0;transform:translateY(30px);
-  transition:opacity .6s ease,transform .6s ease;
-}
-.reveal.visible{opacity:1;transform:translateY(0)}
+    /* ===================== PROGRESS BARS ===================== */
+    .skill-bar-wrap{margin:.5rem 0}
+    .skill-bar-label{
+      display:flex;justify-content:space-between;
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;color:var(--text-mute);
+      margin-bottom:.25rem;
+    }
+    .skill-bar-track{
+      height:6px;background:rgba(255,255,255,.05);
+      position:relative;overflow:hidden;
+    }
+    .skill-bar-fill{
+      height:100%;width:0%;
+      background:linear-gradient(90deg,var(--mc-blue),var(--mc-green));
+      transition:width 1s ease;
+    }
 
-/* ===================== PROGRESS BARS ===================== */
-.skill-bar-wrap{margin:.5rem 0}
-.skill-bar-label{
-  display:flex;justify-content:space-between;
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;color:var(--text-mute);
-  margin-bottom:.25rem;
-}
-.skill-bar-track{
-  height:6px;background:rgba(255,255,255,.05);
-  position:relative;overflow:hidden;
-}
-.skill-bar-fill{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,var(--mc-blue),var(--mc-green));
-  transition:width 1s ease;
-}
+    /* ===================== MOBILE ===================== */
+    @media(max-width:768px){
+      .about-grid{grid-template-columns:1fr;text-align:center}
+      .about-text{text-align:center}
+      .mc-stat-row{justify-content:center}
+      .nav-links{display:none}
+      .exp-header{flex-direction:column}
+      .edu-card{grid-template-columns:1fr;text-align:center}
+      .edu-pixel-icon{margin:0 auto}
+    }
+    @media(max-width:480px){
+      section{padding:5rem 1rem 3rem}
+      .hero-desc{font-size:.95rem}
+      nav{padding:.8rem 1rem}
+    }
 
-/* ===================== MOBILE ===================== */
-@media(max-width:768px){
-  .about-grid{grid-template-columns:1fr;text-align:center}
-  .about-text{text-align:center}
-  .mc-stat-row{justify-content:center}
-  .nav-links{display:none}
-  .exp-header{flex-direction:column}
-  .edu-card{grid-template-columns:1fr;text-align:center}
-  .edu-pixel-icon{margin:0 auto}
-}
-@media(max-width:480px){
-  section{padding:5rem 1rem 3rem}
-  .hero-desc{font-size:.95rem}
-  nav{padding:.8rem 1rem}
-}
+    /* ===================== PIXEL BORDERS ===================== */
+    .px-border{
+      position:relative;
+    }
+    .px-border::before,.px-border::after{
+      content:'';position:absolute;
+      width:10px;height:10px;
+    }
+    .px-border::before{
+      top:-2px;left:-2px;
+      border-top:2px solid var(--mc-blue);
+      border-left:2px solid var(--mc-blue);
+    }
+    .px-border::after{
+      bottom:-2px;right:-2px;
+      border-bottom:2px solid var(--mc-green);
+      border-right:2px solid var(--mc-green);
+    }
 
-/* ===================== PIXEL BORDERS ===================== */
-.px-border{
-  position:relative;
-}
-.px-border::before,.px-border::after{
-  content:'';position:absolute;
-  width:10px;height:10px;
-}
-.px-border::before{
-  top:-2px;left:-2px;
-  border-top:2px solid var(--mc-blue);
-  border-left:2px solid var(--mc-blue);
-}
-.px-border::after{
-  bottom:-2px;right:-2px;
-  border-bottom:2px solid var(--mc-green);
-  border-right:2px solid var(--mc-green);
-}
-
-/* ===================== SCROLLING TICKER ===================== */
-.ticker-wrap{
-  position:relative;z-index:5;
-  overflow:hidden;height:36px;
-  background:rgba(79,195,247,.05);
-  border-top:1px solid var(--border-col);
-  border-bottom:1px solid var(--border-col);
-}
-.ticker{
-  display:flex;white-space:nowrap;
-  animation:ticker 30s linear infinite;
-  height:100%;align-items:center;
-}
-.ticker-item{
-  font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;letter-spacing:.12em;
-  color:var(--text-mute);padding:0 2rem;
-  text-transform:uppercase;
-}
-.ticker-sep{color:var(--mc-blue);margin:0 .5rem}
-@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* ===================== PIXEL DINO ANIMATION ===================== */
-@keyframes dinoLegs{
-  0%,100%{d:path('M 35 60 L 28 75 L 34 75 M 42 60 L 48 75 L 54 75')}
-  50%{d:path('M 35 60 L 30 75 L 36 75 M 42 60 L 44 75 L 50 75')}
-}
-</style>
+    /* ===================== SCROLLING TICKER ===================== */
+    .ticker-wrap{
+      position:relative;z-index:5;
+      overflow:hidden;height:36px;
+      background:rgba(79,195,247,.05);
+      border-top:1px solid var(--border-col);
+      border-bottom:1px solid var(--border-col);
+    }
+    .ticker{
+      display:flex;white-space:nowrap;
+      animation:ticker 30s linear infinite;
+      height:100%;align-items:center;
+    }
+    .ticker-item{
+      font-family:'Share Tech Mono',monospace;
+      font-size:.75rem;letter-spacing:.12em;
+      color:var(--text-mute);padding:0 2rem;
+      text-transform:uppercase;
+    }
+    .ticker-sep{color:var(--mc-blue);margin:0 .5rem}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  </style>
 </head>
+
 <body>
 
 <!-- CUSTOM CURSOR -->
@@ -684,13 +671,13 @@ footer span{color:var(--mc-green)}
 
 <!-- ===================== NAVIGATION ===================== -->
 <nav>
-  <div class="nav-logo">VR<span>.</span>DEV</div>
+  <div class="nav-logo"><span>V</span>IKAS_R</div>
   <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#about">about</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#experience">experience</a></li>
+    <li><a href="#contact">contact</a></li>
   </ul>
 </nav>
 
@@ -708,7 +695,7 @@ footer span{color:var(--mc-green)}
     <a href="#contact" class="btn-secondary">Contact Me</a>
     <a href="https://github.com/rvikas549" target="_blank" class="btn-secondary">GitHub</a>
   </div>
-  <p class="scroll-hint">↓ Scroll to explore ↓</p>
+  <p class="scroll-hint">🎮 SCROLL TO RUN! 🦖<br>JUMP OBSTACLES!</p>
 </section>
 
 <!-- TICKER -->
@@ -726,7 +713,6 @@ footer span{color:var(--mc-green)}
     <span class="ticker-item">REST APIs <span class="ticker-sep">◆</span></span>
     <span class="ticker-item">Git <span class="ticker-sep">◆</span></span>
     <span class="ticker-item">Agile <span class="ticker-sep">◆</span></span>
-    <!-- duplicate for seamless loop -->
     <span class="ticker-item">React.js <span class="ticker-sep">◆</span></span>
     <span class="ticker-item">Node.js <span class="ticker-sep">◆</span></span>
     <span class="ticker-item">TypeScript <span class="ticker-sep">◆</span></span>
@@ -749,48 +735,33 @@ footer span{color:var(--mc-green)}
   <div class="section-line reveal"></div>
   <div class="about-grid">
     <div class="mc-char-container reveal">
-      <!-- Minecraft-style character SVG -->
       <svg class="mc-platform" viewBox="0 0 220 280" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 10px 30px rgba(79,195,247,0.3))">
-        <!-- Shadow -->
-        <ellipse cx="110" cy="265" rx="55" ry="10" fill="rgba(0,0,0,0.4)"/>
-        <!-- Platform block -->
-        <rect x="60" y="240" width="100" height="20" fill="#4FC3F7" rx="2"/>
-        <rect x="60" y="240" width="100" height="4" fill="#81D4FA" rx="2"/>
-        <!-- Body (Minecraft-style) -->
-        <!-- Head -->
-        <rect x="77" y="90" width="66" height="66" fill="#FFCC80" rx="2"/>
-        <!-- Hair/Helmet top -->
-        <rect x="72" y="82" width="76" height="20" fill="#4FC3F7" rx="2"/>
-        <rect x="72" y="82" width="76" height="8" fill="#81D4FA" rx="2"/>
-        <!-- Eyes -->
-        <rect x="88" y="108" width="16" height="16" fill="#1a1a1a" rx="1"/>
-        <rect x="116" y="108" width="16" height="16" fill="#1a1a1a" rx="1"/>
-        <rect x="91" y="111" width="6" height="6" fill="white"/>
-        <rect x="119" y="111" width="6" height="6" fill="white"/>
-        <!-- Smile -->
-        <rect x="94" y="132" width="6" height="5" fill="#cc7a00" rx="1"/>
-        <rect x="103" y="134" width="14" height="3" fill="#cc7a00" rx="1"/>
-        <rect x="120" y="132" width="6" height="5" fill="#cc7a00" rx="1"/>
-        <!-- Torso (shirt) -->
-        <rect x="72" y="158" width="76" height="70" fill="#4FC3F7" rx="2"/>
-        <rect x="72" y="158" width="76" height="8" fill="#81D4FA" rx="2"/>
-        <!-- Code symbol on shirt -->
+        <ellipse cx="110" cy="265" rx="55" ry="10" fill="rgba(0,0,0,0.4)"></ellipse>
+        <rect x="60" y="240" width="100" height="20" fill="#4FC3F7" rx="2"></rect>
+        <rect x="60" y="240" width="100" height="4" fill="#81D4FA" rx="2"></rect>
+        <rect x="77" y="90" width="66" height="66" fill="#FFCC80" rx="2"></rect>
+        <rect x="72" y="82" width="76" height="20" fill="#4FC3F7" rx="2"></rect>
+        <rect x="72" y="82" width="76" height="8" fill="#81D4FA" rx="2"></rect>
+        <rect x="88" y="108" width="16" height="16" fill="#1a1a1a" rx="1"></rect>
+        <rect x="116" y="108" width="16" height="16" fill="#1a1a1a" rx="1"></rect>
+        <rect x="91" y="111" width="6" height="6" fill="white"></rect>
+        <rect x="119" y="111" width="6" height="6" fill="white"></rect>
+        <rect x="94" y="132" width="6" height="5" fill="#cc7a00" rx="1"></rect>
+        <rect x="103" y="134" width="14" height="3" fill="#cc7a00" rx="1"></rect>
+        <rect x="120" y="132" width="6" height="5" fill="#cc7a00" rx="1"></rect>
+        <rect x="72" y="158" width="76" height="70" fill="#4FC3F7" rx="2"></rect>
+        <rect x="72" y="158" width="76" height="8" fill="#81D4FA" rx="2"></rect>
         <text x="110" y="200" text-anchor="middle" fill="rgba(0,0,0,0.5)" font-size="22" font-family="monospace" font-weight="bold">&lt;/&gt;</text>
-        <!-- Arms -->
-        <rect x="36" y="158" width="34" height="60" fill="#FFCC80" rx="2"/>
-        <rect x="150" y="158" width="34" height="60" fill="#FFCC80" rx="2"/>
-        <!-- Left arm sleeve -->
-        <rect x="36" y="158" width="34" height="10" fill="#4FC3F7" rx="2"/>
-        <rect x="150" y="158" width="34" height="10" fill="#4FC3F7" rx="2"/>
-        <!-- Legs -->
-        <rect x="78" y="228" width="28" height="14" fill="#1565C0" rx="2"/>
-        <rect x="114" y="228" width="28" height="14" fill="#1565C0" rx="2"/>
-        <!-- Shoes -->
-        <rect x="74" y="238" width="32" height="6" fill="#333" rx="2"/>
-        <rect x="114" y="238" width="32" height="6" fill="#333" rx="2"/>
-        <!-- Floating name tag -->
-        <rect x="70" y="60" width="80" height="22" fill="rgba(0,0,0,0.7)" rx="3"/>
-        <rect x="70" y="60" width="80" height="22" fill="none" stroke="#4FC3F7" stroke-width="1" rx="3"/>
+        <rect x="36" y="158" width="34" height="60" fill="#FFCC80" rx="2"></rect>
+        <rect x="150" y="158" width="34" height="60" fill="#FFCC80" rx="2"></rect>
+        <rect x="36" y="158" width="34" height="10" fill="#4FC3F7" rx="2"></rect>
+        <rect x="150" y="158" width="34" height="10" fill="#4FC3F7" rx="2"></rect>
+        <rect x="78" y="228" width="28" height="14" fill="#1565C0" rx="2"></rect>
+        <rect x="114" y="228" width="28" height="14" fill="#1565C0" rx="2"></rect>
+        <rect x="74" y="238" width="32" height="6" fill="#333" rx="2"></rect>
+        <rect x="114" y="238" width="32" height="6" fill="#333" rx="2"></rect>
+        <rect x="70" y="60" width="80" height="22" fill="rgba(0,0,0,0.7)" rx="3"></rect>
+        <rect x="70" y="60" width="80" height="22" fill="none" stroke="#4FC3F7" stroke-width="1" rx="3"></rect>
         <text x="110" y="76" text-anchor="middle" fill="#4FC3F7" font-size="11" font-family="monospace">Vikas_R</text>
       </svg>
     </div>
@@ -903,16 +874,15 @@ footer span{color:var(--mc-green)}
   <div class="section-line reveal"></div>
   <div class="projects-grid">
 
-    <!-- CollabDocs -->
     <div class="proj-card reveal">
       <div class="proj-number">01</div>
       <div class="proj-icon">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="4" fill="rgba(79,195,247,0.1)"/>
-          <rect x="8" y="10" width="24" height="4" rx="1" fill="#4FC3F7"/>
-          <rect x="8" y="17" width="18" height="3" rx="1" fill="#4FC3F7" opacity=".6"/>
-          <rect x="8" y="23" width="20" height="3" rx="1" fill="#4FC3F7" opacity=".4"/>
-          <circle cx="30" cy="28" r="7" fill="rgba(102,187,106,0.3)" stroke="#66BB6A" stroke-width="1.5"/>
+          <rect width="40" height="40" rx="4" fill="rgba(79,195,247,0.1)"></rect>
+          <rect x="8" y="10" width="24" height="4" rx="1" fill="#4FC3F7"></rect>
+          <rect x="8" y="17" width="18" height="3" rx="1" fill="#4FC3F7" opacity=".6"></rect>
+          <rect x="8" y="23" width="20" height="3" rx="1" fill="#4FC3F7" opacity=".4"></rect>
+          <circle cx="30" cy="28" r="7" fill="rgba(102,187,106,0.3)" stroke="#66BB6A" stroke-width="1.5"></circle>
           <text x="30" y="32" text-anchor="middle" fill="#66BB6A" font-size="9" font-weight="bold">✓</text>
         </svg>
       </div>
@@ -929,17 +899,16 @@ footer span{color:var(--mc-green)}
       </div>
     </div>
 
-    <!-- Chatbot -->
     <div class="proj-card reveal">
       <div class="proj-number">02</div>
       <div class="proj-icon">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="4" fill="rgba(102,187,106,0.1)"/>
-          <rect x="6" y="8" width="28" height="18" rx="3" fill="none" stroke="#66BB6A" stroke-width="1.5"/>
-          <polygon points="12,26 18,26 15,32" fill="#66BB6A"/>
-          <circle cx="13" cy="17" r="2" fill="#66BB6A"/>
-          <circle cx="20" cy="17" r="2" fill="#66BB6A"/>
-          <circle cx="27" cy="17" r="2" fill="#66BB6A"/>
+          <rect width="40" height="40" rx="4" fill="rgba(102,187,106,0.1)"></rect>
+          <rect x="6" y="8" width="28" height="18" rx="3" fill="none" stroke="#66BB6A" stroke-width="1.5"></rect>
+          <polygon points="12,26 18,26 15,32" fill="#66BB6A"></polygon>
+          <circle cx="13" cy="17" r="2" fill="#66BB6A"></circle>
+          <circle cx="20" cy="17" r="2" fill="#66BB6A"></circle>
+          <circle cx="27" cy="17" r="2" fill="#66BB6A"></circle>
         </svg>
       </div>
       <div class="proj-name">Institutional ChatBot</div>
@@ -954,17 +923,16 @@ footer span{color:var(--mc-green)}
       </div>
     </div>
 
-    <!-- Social Media -->
     <div class="proj-card reveal">
       <div class="proj-number">03</div>
       <div class="proj-icon">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="4" fill="rgba(141,110,99,0.15)"/>
-          <circle cx="20" cy="14" r="5" stroke="#64B5F6" stroke-width="1.5" fill="none"/>
-          <circle cx="9" cy="28" r="4" stroke="#64B5F6" stroke-width="1.5" fill="none"/>
-          <circle cx="31" cy="28" r="4" stroke="#64B5F6" stroke-width="1.5" fill="none"/>
-          <line x1="14" y1="17" x2="9" y2="24" stroke="#4FC3F7" stroke-width="1"/>
-          <line x1="26" y1="17" x2="31" y2="24" stroke="#4FC3F7" stroke-width="1"/>
+          <rect width="40" height="40" rx="4" fill="rgba(141,110,99,0.15)"></rect>
+          <circle cx="20" cy="14" r="5" stroke="#64B5F6" stroke-width="1.5" fill="none"></circle>
+          <circle cx="9" cy="28" r="4" stroke="#64B5F6" stroke-width="1.5" fill="none"></circle>
+          <circle cx="31" cy="28" r="4" stroke="#64B5F6" stroke-width="1.5" fill="none"></circle>
+          <line x1="14" y1="17" x2="9" y2="24" stroke="#4FC3F7" stroke-width="1"></line>
+          <line x1="26" y1="17" x2="31" y2="24" stroke="#4FC3F7" stroke-width="1"></line>
         </svg>
       </div>
       <div class="proj-name">Social Media Platform</div>
@@ -979,18 +947,17 @@ footer span{color:var(--mc-green)}
       </div>
     </div>
 
-    <!-- Emission Detection -->
     <div class="proj-card reveal">
       <div class="proj-number">04</div>
       <div class="proj-icon">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="4" fill="rgba(239,154,154,0.1)"/>
-          <circle cx="20" cy="20" r="10" stroke="#EF9A9A" stroke-width="1.5" fill="none"/>
-          <circle cx="20" cy="20" r="5" fill="rgba(239,154,154,0.3)"/>
-          <line x1="20" y1="6" x2="20" y2="10" stroke="#EF9A9A" stroke-width="1.5"/>
-          <line x1="20" y1="30" x2="20" y2="34" stroke="#EF9A9A" stroke-width="1.5"/>
-          <line x1="6" y1="20" x2="10" y2="20" stroke="#EF9A9A" stroke-width="1.5"/>
-          <line x1="30" y1="20" x2="34" y2="20" stroke="#EF9A9A" stroke-width="1.5"/>
+          <rect width="40" height="40" rx="4" fill="rgba(239,154,154,0.1)"></rect>
+          <circle cx="20" cy="20" r="10" stroke="#EF9A9A" stroke-width="1.5" fill="none"></circle>
+          <circle cx="20" cy="20" r="5" fill="rgba(239,154,154,0.3)"></circle>
+          <line x1="20" y1="6" x2="20" y2="10" stroke="#EF9A9A" stroke-width="1.5"></line>
+          <line x1="20" y1="30" x2="20" y2="34" stroke="#EF9A9A" stroke-width="1.5"></line>
+          <line x1="6" y1="20" x2="10" y2="20" stroke="#EF9A9A" stroke-width="1.5"></line>
+          <line x1="30" y1="20" x2="34" y2="20" stroke="#EF9A9A" stroke-width="1.5"></line>
         </svg>
       </div>
       <div class="proj-name">Emission Detection</div>
@@ -1003,17 +970,16 @@ footer span{color:var(--mc-green)}
       </div>
     </div>
 
-    <!-- BGBT -->
     <div class="proj-card reveal">
       <div class="proj-number">05</div>
       <div class="proj-icon">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="4" fill="rgba(79,195,247,0.08)"/>
-          <rect x="7" y="10" width="26" height="20" rx="2" fill="none" stroke="#4FC3F7" stroke-width="1.5"/>
-          <rect x="12" y="14" width="7" height="7" rx="1" fill="rgba(79,195,247,0.4)"/>
-          <rect x="21" y="14" width="7" height="3" rx="1" fill="rgba(79,195,247,0.3)"/>
-          <rect x="21" y="19" width="5" height="2" rx="1" fill="rgba(79,195,247,0.2)"/>
-          <rect x="12" y="24" width="16" height="2" rx="1" fill="rgba(79,195,247,0.2)"/>
+          <rect width="40" height="40" rx="4" fill="rgba(79,195,247,0.08)"></rect>
+          <rect x="7" y="10" width="26" height="20" rx="2" fill="none" stroke="#4FC3F7" stroke-width="1.5"></rect>
+          <rect x="12" y="14" width="7" height="7" rx="1" fill="rgba(79,195,247,0.4)"></rect>
+          <rect x="21" y="14" width="7" height="3" rx="1" fill="rgba(79,195,247,0.3)"></rect>
+          <rect x="21" y="19" width="5" height="2" rx="1" fill="rgba(79,195,247,0.2)"></rect>
+          <rect x="12" y="24" width="16" height="2" rx="1" fill="rgba(79,195,247,0.2)"></rect>
         </svg>
       </div>
       <div class="proj-name">BGBT E-Commerce</div>
@@ -1091,19 +1057,19 @@ footer span{color:var(--mc-green)}
   </p>
   <div class="contact-grid reveal">
     <a href="mailto:rvikas549@gmail.com" class="contact-link">
-      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m2 7 10 7 10-7"></path></svg>
       rvikas549@gmail.com
     </a>
     <a href="https://github.com/rvikas549" target="_blank" class="contact-link">
-      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
       GitHub
     </a>
     <a href="https://www.linkedin.com/in/vikas-r-7a6b88251/" target="_blank" class="contact-link">
-      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
       LinkedIn
     </a>
     <a href="tel:+919844132993" class="contact-link">
-      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.41a2 2 0 0 1 2-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <svg class="c-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.41a2 2 0 0 1 2-2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
       +91 98441 32993
     </a>
   </div>
@@ -1111,8 +1077,7 @@ footer span{color:var(--mc-green)}
 
 <!-- ===================== FOOTER ===================== -->
 <footer>
-  <p>Designed & Built by <span>Vikas R</span> · <span>2025</span> · All Blocks Reserved <span>🦕</span></p>
-  <p style="margin-top:.5rem;opacity:.4">// Made with React instincts in pure HTML+JS+Three.js</p>
+  <p>© 2025 Vikas R · Crafted with <span>❤</span> and <span>JavaScript</span></p>
 </footer>
 
 <!-- ===================== SCRIPTS ===================== -->
@@ -1181,13 +1146,13 @@ function makePixelDino(x,y,z,s){
   const mat=new THREE.MeshStandardMaterial({color:0x4FC3F7,metalness:.2,roughness:.5,transparent:true,opacity:.25});
   const wiremat=new THREE.MeshBasicMaterial({color:0x4FC3F7,wireframe:true,transparent:true,opacity:.15});
   const parts=[
-    {w:2,h:2.5,d:1.5,px:0,py:1.25,pz:0},  // body
-    {w:1.5,h:1.5,d:1.2,px:.2,py:3.2,pz:0}, // head
-    {w:.5,h:1.2,d:.6,px:-1.2,py:.8,pz:0},  // tail
-    {w:.4,h:1.8,d:.5,px:.8,py:.2,pz:0},    // leg R
-    {w:.4,h:1.8,d:.5,px:.1,py:.2,pz:0},    // leg L
-    {w:.3,h:.8,d:.3,px:1.1,py:2.5,pz:.3},  // arm R
-    {w:.3,h:.8,d:.3,px:-.3,py:2.5,pz:.3},  // arm L
+    {w:2,h:2.5,d:1.5,px:0,py:1.25,pz:0},
+    {w:1.5,h:1.5,d:1.2,px:.2,py:3.2,pz:0},
+    {w:.5,h:1.2,d:.6,px:-1.2,py:.8,pz:0},
+    {w:.4,h:1.8,d:.5,px:.8,py:.2,pz:0},
+    {w:.4,h:1.8,d:.5,px:.1,py:.2,pz:0},
+    {w:.3,h:.8,d:.3,px:1.1,py:2.5,pz:.3},
+    {w:.3,h:.8,d:.3,px:-.3,py:2.5,pz:.3},
   ];
   parts.forEach(p=>{
     const geo=new THREE.BoxGeometry(p.w*s,p.h*s,p.d*s);
@@ -1296,56 +1261,61 @@ const barIO=new IntersectionObserver(entries=>{
 const skillSec=document.getElementById('about');
 if(skillSec)barIO.observe(skillSec);
 
-/* ---- DINO GAME STRIP ---- */
+/* ============ SCROLL-BASED DINO GAME ============ */
 (function(){
   const strip=document.getElementById('dino-strip');
   
-  /* Running dino SVG */
-  let dinoX=0;
-  const runnerDiv=document.createElement('div');
-  runnerDiv.style.cssText='position:absolute;bottom:30px;left:0;pointer-events:none;transition:none;';
+  // Create dino
+  const dinoDiv=document.createElement('div');
+  dinoDiv.style.cssText='position:absolute;bottom:30px;left:50px;pointer-events:none;transition:bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);';
   let legToggle=false;
+  let isJumping=false;
+  
   function dinoSVG(leg){
     return`<svg width="70" height="65" viewBox="0 0 70 65" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
-      <!-- Body -->
       <rect x="20" y="18" width="30" height="22" fill="#535353"/>
-      <!-- Head -->
       <rect x="36" y="6" width="22" height="16" fill="#535353"/>
-      <!-- Eye -->
       <rect x="50" y="9" width="5" height="5" fill="white"/>
       <rect x="52" y="10" width="3" height="3" fill="#1a1a1a"/>
-      <!-- Jaw -->
       <rect x="52" y="19" width="12" height="5" fill="#535353"/>
-      <!-- Tail -->
       <rect x="4" y="24" width="18" height="10" fill="#535353"/>
       <rect x="0" y="28" width="8" height="6" fill="#535353"/>
-      <!-- Arms -->
       <rect x="44" y="28" width="8" height="6" fill="#535353"/>
-      <!-- Legs -->
       ${leg?
         '<rect x="26" y="40" width="8" height="18" fill="#535353"/><rect x="20" y="52" width="10" height="6" fill="#535353"/><rect x="38" y="40" width="8" height="12" fill="#535353"/><rect x="34" y="46" width="10" height="6" fill="#535353"/>'
         :'<rect x="26" y="40" width="8" height="12" fill="#535353"/><rect x="20" y="46" width="10" height="6" fill="#535353"/><rect x="38" y="40" width="8" height="18" fill="#535353"/><rect x="34" y="52" width="10" height="6" fill="#535353"/>'}
     </svg>`;
   }
-  runnerDiv.innerHTML=dinoSVG(false);
-  strip.appendChild(runnerDiv);
   
-  /* Cacti */
-  const cactusPositions=[0.7,1.5];
-  const cacti=cactusPositions.map((pos,i)=>{
-    const c=document.createElement('div');
-    c.style.cssText=`position:absolute;bottom:30px;right:${pos*100}%;pointer-events:none;`;
-    c.innerHTML=`<svg width="30" height="45" viewBox="0 0 30 45" style="image-rendering:pixelated">
-      <rect x="10" y="0" width="10" height="45" fill="#4CAF50"/>
-      <rect x="0" y="15" width="10" height="8" fill="#4CAF50"/>
-      <rect x="20" y="20" width="10" height="8" fill="#4CAF50"/>
+  dinoDiv.innerHTML=dinoSVG(false);
+  strip.appendChild(dinoDiv);
+  
+  // Create obstacles (trees/cacti)
+  const obstacles=[];
+  const obstacleData=[
+    {scrollPos:500,passed:false},
+    {scrollPos:1200,passed:false},
+    {scrollPos:2000,passed:false},
+    {scrollPos:2800,passed:false},
+    {scrollPos:3600,passed:false},
+    {scrollPos:4500,passed:false},
+    {scrollPos:5300,passed:false}
+  ];
+  
+  obstacleData.forEach((data,idx)=>{
+    const obs=document.createElement('div');
+    obs.style.cssText='position:absolute;bottom:30px;right:-50px;pointer-events:none;';
+    obs.innerHTML=`<svg width="40" height="55" viewBox="0 0 40 55" style="image-rendering:pixelated">
+      <rect x="14" y="0" width="12" height="55" fill="#4CAF50"/>
+      <rect x="2" y="18" width="12" height="10" fill="#4CAF50"/>
+      <rect x="26" y="24" width="12" height="10" fill="#4CAF50"/>
     </svg>`;
-    strip.appendChild(c);
-    return c;
+    strip.appendChild(obs);
+    obstacles.push({element:obs,data:data});
   });
   
-  /* Clouds */
-  [300,700,1100].forEach(pos=>{
+  // Add clouds
+  [200,500,800].forEach(pos=>{
     const cl=document.createElement('div');
     cl.style.cssText=`position:absolute;top:10px;left:${pos}px;animation:cloudMove 20s linear infinite;`;
     cl.innerHTML=`<svg width="60" height="20" viewBox="0 0 60 20" style="image-rendering:pixelated">
@@ -1359,33 +1329,67 @@ if(skillSec)barIO.observe(skillSec);
   style.textContent='@keyframes cloudMove{from{transform:translateX(0)}to{transform:translateX(-1400px)}}';
   document.head.appendChild(style);
   
-  let x=50;
-  let cactX=[window.innerWidth*0.7, window.innerWidth*1.5];
-  const speed=180;
-  let last=performance.now();
-  let frame=0;
+  let lastScroll=window.scrollY;
+  let animFrame=0;
   
-  function loop(now){
-    const dt=(now-last)/1000;
-    last=now;
-    frame++;
-    if(frame%8===0){
-      legToggle=!legToggle;
-      runnerDiv.innerHTML=dinoSVG(legToggle);
-    }
-    x+=speed*dt;
-    if(x>window.innerWidth+100)x=-100;
-    runnerDiv.style.left=x+'px';
+  // Scroll handler
+  window.addEventListener('scroll',()=>{
+    const currentScroll=window.scrollY;
+    const scrollDelta=currentScroll-lastScroll;
     
-    cactX=cactX.map((cx,i)=>{
-      cx-=speed*dt;
-      if(cx<-50)cx=window.innerWidth+Math.random()*400+200;
-      cacti[i].style.left=cx+'px';
-      return cx;
+    // Animate dino legs when scrolling
+    if(Math.abs(scrollDelta)>5){
+      animFrame++;
+      if(animFrame%3===0){
+        legToggle=!legToggle;
+        dinoDiv.innerHTML=dinoSVG(legToggle);
+      }
+    }
+    
+    // Position obstacles based on scroll
+    const stripWidth=window.innerWidth;
+    const dinoX=50;
+    const dinoWidth=70;
+    
+    obstacles.forEach(obs=>{
+      // Calculate obstacle position based on scroll
+      const scrollProgress=currentScroll;
+      const relativePos=obs.data.scrollPos-scrollProgress;
+      
+      // Position from right side
+      const obstacleX=stripWidth-relativePos;
+      obs.element.style.right=`${stripWidth-obstacleX}px`;
+      
+      // Check collision/proximity for jump
+      const obsLeft=obstacleX-40;
+      const obsRight=obstacleX;
+      const dinoRight=dinoX+dinoWidth;
+      
+      // If dino is approaching obstacle (within 100px), trigger jump
+      if(!obs.data.passed&&obsLeft<dinoRight+100&&obsLeft>dinoX-50){
+        if(!isJumping){
+          isJumping=true;
+          dinoDiv.style.bottom='80px';
+          setTimeout(()=>{
+            dinoDiv.style.bottom='30px';
+            isJumping=false;
+          },400);
+        }
+      }
+      
+      // Mark as passed
+      if(obsRight<dinoX){
+        obs.data.passed=true;
+      }
+      
+      // Reset obstacles that went off screen
+      if(obstacleX<-100){
+        obs.data.passed=false;
+      }
     });
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
+    
+    lastScroll=currentScroll;
+  },{passive:true});
 })();
 
 /* ---- FLOATING MC CUBES (DOM) ---- */
@@ -1477,5 +1481,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   });
 });
 </script>
+
 </body>
 </html>
+
