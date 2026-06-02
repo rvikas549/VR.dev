@@ -74,21 +74,79 @@ body:hover #cursor{transform:scale(1.2)}
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ===================== DINO GAME STRIP ===================== */
-#dino-strip{
-  position:fixed;bottom:0;left:0;right:0;
-  height:100px;z-index:10;
-  background:linear-gradient(to top,#111,transparent);
-  overflow:hidden;pointer-events:none;
+/* ===================== SCROLL DINO WORLD ===================== */
+#scroll-dino-world{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  height:110px;
+  z-index:20;
+  pointer-events:none;
+  overflow:hidden;
+  background:linear-gradient(to top,rgba(10,10,10,.95) 60%,transparent);
 }
-#dino-ground-line{
-  position:absolute;bottom:28px;left:0;right:0;
-  height:2px;background:#4FC3F7;opacity:.4;
-}
-.cloud-pixel{
+#sdw-ground{
   position:absolute;
-  background:#3a3a3a;
+  bottom:30px;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,#4FC3F7 10%,#4FC3F7 90%,transparent);
+  opacity:.5;
+}
+#sdw-ground::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:1px;
+  background:repeating-linear-gradient(90deg,
+    rgba(79,195,247,.15) 0px,rgba(79,195,247,.15) 8px,
+    transparent 8px,transparent 16px);
+}
+#sdw-hud{
+  position:absolute;
+  top:8px;right:16px;
+  font-family:'VT323',monospace;
+  font-size:1.1rem;
+  color:rgba(79,195,247,.7);
+  display:flex;align-items:center;gap:12px;
+  letter-spacing:.1em;
+}
+#sdw-score{
+  color:#e8e8e8;
+  font-size:1.2rem;
+  min-width:60px;text-align:right;
+}
+#sdw-hint{
+  font-size:.75rem;
+  font-family:'Share Tech Mono',monospace;
+  color:rgba(79,195,247,.5);
+  letter-spacing:.15em;
+  animation:blink 1s step-end infinite;
+}
+#sdw-hint.gone{display:none}
+#sdw-dino{
+  position:absolute;
+  bottom:32px;
+  left:120px;
+  width:70px;height:65px;
   image-rendering:pixelated;
+  will-change:transform;
+}
+.sdw-obstacle{
+  position:absolute;
+  bottom:32px;
+  image-rendering:pixelated;
+  pointer-events:none;
+}
+.sdw-dust-puff{
+  position:absolute;
+  bottom:32px;
+  width:8px;height:8px;
+  background:rgba(79,195,247,.4);
+  pointer-events:none;
+  animation:dustFade .4s ease forwards;
+}
+@keyframes dustFade{
+  0%{opacity:.6;transform:scale(1) translate(0,0)}
+  100%{opacity:0;transform:scale(2.5) translate(-8px,-10px)}
 }
 
 /* ===================== NAV ===================== */
@@ -677,9 +735,17 @@ footer span{color:var(--mc-green)}
 <!-- NOISE OVERLAY -->
 <div class="noise"></div>
 
-<!-- DINO STRIP -->
-<div id="dino-strip">
-  <div id="dino-ground-line"></div>
+<!-- ===================== SCROLL DINO RUNNER ===================== -->
+<div id="scroll-dino-world">
+  <div id="sdw-ground"></div>
+  <div id="sdw-hud">
+    <span id="sdw-score-label">SCORE</span>
+    <span id="sdw-score">00000</span>
+    <span id="sdw-hint">SCROLL TO RUN</span>
+  </div>
+  <div id="sdw-dino"></div>
+  <div id="sdw-obstacles"></div>
+  <div id="sdw-dust"></div>
 </div>
 
 <!-- ===================== NAVIGATION ===================== -->
@@ -708,7 +774,7 @@ footer span{color:var(--mc-green)}
     <a href="#contact" class="btn-secondary">Contact Me</a>
     <a href="https://github.com/rvikas549" target="_blank" class="btn-secondary">GitHub</a>
   </div>
-  <p class="scroll-hint">↓ Scroll to explore ↓</p>
+  <p class="scroll-hint" id="scroll-hint-text">↓ Scroll to Explore &amp; Play ↓</p>
 </section>
 
 <!-- TICKER -->
@@ -1296,96 +1362,293 @@ const barIO=new IntersectionObserver(entries=>{
 const skillSec=document.getElementById('about');
 if(skillSec)barIO.observe(skillSec);
 
-/* ---- DINO GAME STRIP ---- */
+/* ======================================================
+   SCROLL-DRIVEN DINO RUNNER
+   - Dino X position = driven by scroll progress (0→100%)
+   - Obstacles placed at fixed scroll% waypoints
+   - When dino hits obstacle zone → jump arc plays
+   - Speed of legs = scroll velocity
+   ====================================================== */
 (function(){
-  const strip=document.getElementById('dino-strip');
-  
-  /* Running dino SVG */
-  let dinoX=0;
-  const runnerDiv=document.createElement('div');
-  runnerDiv.style.cssText='position:absolute;bottom:30px;left:0;pointer-events:none;transition:none;';
-  let legToggle=false;
-  function dinoSVG(leg){
-    return`<svg width="70" height="65" viewBox="0 0 70 65" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
-      <!-- Body -->
-      <rect x="20" y="18" width="30" height="22" fill="#535353"/>
-      <!-- Head -->
-      <rect x="36" y="6" width="22" height="16" fill="#535353"/>
-      <!-- Eye -->
-      <rect x="50" y="9" width="5" height="5" fill="white"/>
-      <rect x="52" y="10" width="3" height="3" fill="#1a1a1a"/>
-      <!-- Jaw -->
-      <rect x="52" y="19" width="12" height="5" fill="#535353"/>
-      <!-- Tail -->
-      <rect x="4" y="24" width="18" height="10" fill="#535353"/>
-      <rect x="0" y="28" width="8" height="6" fill="#535353"/>
-      <!-- Arms -->
-      <rect x="44" y="28" width="8" height="6" fill="#535353"/>
-      <!-- Legs -->
-      ${leg?
-        '<rect x="26" y="40" width="8" height="18" fill="#535353"/><rect x="20" y="52" width="10" height="6" fill="#535353"/><rect x="38" y="40" width="8" height="12" fill="#535353"/><rect x="34" y="46" width="10" height="6" fill="#535353"/>'
-        :'<rect x="26" y="40" width="8" height="12" fill="#535353"/><rect x="20" y="46" width="10" height="6" fill="#535353"/><rect x="38" y="40" width="8" height="18" fill="#535353"/><rect x="34" y="52" width="10" height="6" fill="#535353"/>'}
+
+  /* ---- SVG HELPERS ---- */
+  function dinoSVG(leg, jumping){
+    const bodyColor = '#535353';
+    const eyeColor  = '#4FC3F7';
+    // jumping: legs tucked up
+    const legs = jumping
+      ? `<rect x="28" y="44" width="8" height="10" fill="${bodyColor}"/>
+         <rect x="22" y="48" width="10" height="5" fill="${bodyColor}"/>
+         <rect x="38" y="44" width="8" height="10" fill="${bodyColor}"/>
+         <rect x="36" y="48" width="10" height="5" fill="${bodyColor}"/>`
+      : (leg
+        ? `<rect x="26" y="40" width="8" height="18" fill="${bodyColor}"/>
+           <rect x="20" y="52" width="10" height="6" fill="${bodyColor}"/>
+           <rect x="38" y="40" width="8" height="12" fill="${bodyColor}"/>
+           <rect x="34" y="46" width="10" height="6" fill="${bodyColor}"/>`
+        : `<rect x="26" y="40" width="8" height="12" fill="${bodyColor}"/>
+           <rect x="20" y="46" width="10" height="6" fill="${bodyColor}"/>
+           <rect x="38" y="40" width="8" height="18" fill="${bodyColor}"/>
+           <rect x="34" y="52" width="10" height="6" fill="${bodyColor}"/>`);
+    return `<svg width="70" height="65" viewBox="0 0 70 65" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+      <rect x="20" y="18" width="30" height="22" fill="${bodyColor}"/>
+      <rect x="36" y="6"  width="22" height="16" fill="${bodyColor}"/>
+      <rect x="50" y="9"  width="5"  height="5"  fill="white"/>
+      <rect x="52" y="10" width="3"  height="3"  fill="#111"/>
+      <rect x="51" y="9"  width="2"  height="2"  fill="${eyeColor}" opacity=".8"/>
+      <rect x="52" y="19" width="12" height="5"  fill="${bodyColor}"/>
+      <rect x="4"  y="24" width="18" height="10" fill="${bodyColor}"/>
+      <rect x="0"  y="28" width="8"  height="6"  fill="${bodyColor}"/>
+      <rect x="44" y="28" width="8"  height="6"  fill="${bodyColor}"/>
+      ${legs}
     </svg>`;
   }
-  runnerDiv.innerHTML=dinoSVG(false);
-  strip.appendChild(runnerDiv);
-  
-  /* Cacti */
-  const cactusPositions=[0.7,1.5];
-  const cacti=cactusPositions.map((pos,i)=>{
-    const c=document.createElement('div');
-    c.style.cssText=`position:absolute;bottom:30px;right:${pos*100}%;pointer-events:none;`;
-    c.innerHTML=`<svg width="30" height="45" viewBox="0 0 30 45" style="image-rendering:pixelated">
-      <rect x="10" y="0" width="10" height="45" fill="#4CAF50"/>
-      <rect x="0" y="15" width="10" height="8" fill="#4CAF50"/>
-      <rect x="20" y="20" width="10" height="8" fill="#4CAF50"/>
+
+  function cactusSmallSVG(){
+    return `<svg width="28" height="50" viewBox="0 0 28 50" style="image-rendering:pixelated">
+      <rect x="9"  y="5"  width="10" height="45" fill="#4CAF50"/>
+      <rect x="1"  y="18" width="8"  height="8"  fill="#4CAF50"/>
+      <rect x="1"  y="14" width="8"  height="6"  fill="#388E3C"/>
+      <rect x="19" y="22" width="8"  height="8"  fill="#4CAF50"/>
+      <rect x="19" y="18" width="8"  height="6"  fill="#388E3C"/>
+      <rect x="9"  y="5"  width="10" height="4"  fill="#66BB6A"/>
     </svg>`;
-    strip.appendChild(c);
-    return c;
-  });
-  
-  /* Clouds */
-  [300,700,1100].forEach(pos=>{
-    const cl=document.createElement('div');
-    cl.style.cssText=`position:absolute;top:10px;left:${pos}px;animation:cloudMove 20s linear infinite;`;
-    cl.innerHTML=`<svg width="60" height="20" viewBox="0 0 60 20" style="image-rendering:pixelated">
-      <rect x="10" y="8" width="40" height="8" fill="#3a3a3a"/>
-      <rect x="20" y="0" width="20" height="10" fill="#3a3a3a"/>
+  }
+
+  function cactusDoubleSVG(){
+    return `<svg width="48" height="55" viewBox="0 0 48 55" style="image-rendering:pixelated">
+      <rect x="9"  y="5"  width="10" height="50" fill="#4CAF50"/>
+      <rect x="1"  y="20" width="8"  height="8"  fill="#4CAF50"/>
+      <rect x="1"  y="16" width="8"  height="6"  fill="#388E3C"/>
+      <rect x="19" y="24" width="8"  height="8"  fill="#4CAF50"/>
+      <rect x="19" y="20" width="8"  height="6"  fill="#388E3C"/>
+      <rect x="9"  y="5"  width="10" height="4"  fill="#66BB6A"/>
+      <rect x="30" y="15" width="10" height="40" fill="#388E3C"/>
+      <rect x="38" y="28" width="8"  height="7"  fill="#388E3C"/>
+      <rect x="38" y="24" width="8"  height="5"  fill="#2E7D32"/>
+      <rect x="30" y="15" width="10" height="4"  fill="#4CAF50"/>
     </svg>`;
-    strip.appendChild(cl);
+  }
+
+  function treePixelSVG(){
+    return `<svg width="50" height="70" viewBox="0 0 50 70" style="image-rendering:pixelated">
+      <rect x="20" y="45" width="10" height="25" fill="#795548"/>
+      <rect x="18" y="40" width="14" height="8"  fill="#5D4037"/>
+      <rect x="5"  y="28" width="40" height="18" fill="#2E7D32"/>
+      <rect x="10" y="15" width="30" height="18" fill="#388E3C"/>
+      <rect x="14" y="5"  width="22" height="14" fill="#4CAF50"/>
+      <rect x="18" y="0"  width="14" height="10" fill="#66BB6A"/>
+      <rect x="5"  y="28" width="40" height="4"  fill="#43A047"/>
+      <rect x="10" y="15" width="30" height="4"  fill="#4CAF50"/>
+    </svg>`;
+  }
+
+  function cloudSVG(){
+    return `<svg width="70" height="28" viewBox="0 0 70 28" style="image-rendering:pixelated">
+      <rect x="14" y="12" width="42" height="12" fill="#2a2a2a"/>
+      <rect x="22" y="4"  width="26" height="12" fill="#2a2a2a"/>
+      <rect x="8"  y="8"  width="16" height="10" fill="#222"/>
+      <rect x="46" y="8"  width="16" height="10" fill="#222"/>
+    </svg>`;
+  }
+
+  /* ---- DOM REFS ---- */
+  const world     = document.getElementById('scroll-dino-world');
+  const dinoel    = document.getElementById('sdw-dino');
+  const obstWrap  = document.getElementById('sdw-obstacles');
+  const dustWrap  = document.getElementById('sdw-dust');
+  const scoreEl   = document.getElementById('sdw-score');
+  const hintEl    = document.getElementById('sdw-hint');
+
+  /* ---- STATE ---- */
+  const GROUND_Y    = 0;           // px bottom offset when on ground (CSS: bottom:32px on dino)
+  const JUMP_HEIGHT = 58;          // px lift at jump peak
+  const JUMP_DUR    = 500;         // ms for a full jump arc
+  const DINO_X      = 120;         // fixed screen X of dino
+  const DINO_W      = 52;          // hitbox width
+  const DINO_H      = 50;          // hitbox height
+
+  let legToggle   = false;
+  let legFrame    = 0;
+  let isJumping   = false;
+  let jumpStart   = 0;
+  let jumpY       = 0;             // current lift in px
+  let score       = 0;
+  let hintShown   = true;
+  let scrollStarted = false;
+  let lastScrollY = window.scrollY;
+  let lastScrollTime = performance.now();
+
+  /* ---- CLOUDS (decorative, scroll-parallax) ---- */
+  const clouds = [];
+  [80, 280, 520, 760, 1050].forEach((x, i)=>{
+    const c = document.createElement('div');
+    c.style.cssText = `position:absolute;top:${4+i%2*14}px;left:${x}px;pointer-events:none;opacity:.55;`;
+    c.innerHTML = cloudSVG();
+    world.appendChild(c);
+    clouds.push({el:c, baseX:x, speed:0.18+i*0.04});
   });
-  
-  const style=document.createElement('style');
-  style.textContent='@keyframes cloudMove{from{transform:translateX(0)}to{transform:translateX(-1400px)}}';
-  document.head.appendChild(style);
-  
-  let x=50;
-  let cactX=[window.innerWidth*0.7, window.innerWidth*1.5];
-  const speed=180;
-  let last=performance.now();
-  let frame=0;
-  
-  function loop(now){
-    const dt=(now-last)/1000;
-    last=now;
-    frame++;
-    if(frame%8===0){
-      legToggle=!legToggle;
-      runnerDiv.innerHTML=dinoSVG(legToggle);
+
+  /* ---- OBSTACLE DEFINITIONS ---- */
+  // scrollPct: 0→1, at what scroll progress this obstacle appears
+  // type: 'cactus'|'double'|'tree'
+  // w,h: hitbox of obstacle SVG
+  const OBSTACLE_DEFS = [
+    {scrollPct:0.06, type:'cactus', w:20, h:44},
+    {scrollPct:0.13, type:'tree',   w:36, h:64},
+    {scrollPct:0.21, type:'double', w:40, h:50},
+    {scrollPct:0.30, type:'cactus', w:20, h:44},
+    {scrollPct:0.38, type:'tree',   w:36, h:64},
+    {scrollPct:0.46, type:'cactus', w:20, h:44},
+    {scrollPct:0.54, type:'double', w:40, h:50},
+    {scrollPct:0.62, type:'tree',   w:36, h:64},
+    {scrollPct:0.70, type:'cactus', w:20, h:44},
+    {scrollPct:0.78, type:'double', w:40, h:50},
+    {scrollPct:0.86, type:'tree',   w:36, h:64},
+    {scrollPct:0.93, type:'cactus', w:20, h:44},
+  ];
+
+  /* ---- BUILD OBSTACLE ELEMENTS ---- */
+  // Each obstacle has a "world X" = its position in a virtual infinite ground
+  // We map scrollProgress → world X and place obstacles accordingly
+  const PAGE_WORLD_W = 8000; // virtual ground width in px
+
+  const obstacles = OBSTACLE_DEFS.map(def=>{
+    const el = document.createElement('div');
+    el.className = 'sdw-obstacle';
+    el.innerHTML = def.type==='cactus' ? cactusSmallSVG()
+                 : def.type==='double' ? cactusDoubleSVG()
+                 : treePixelSVG();
+    obstWrap.appendChild(el);
+    return {
+      el,
+      worldX: def.scrollPct * PAGE_WORLD_W,
+      w: def.w,
+      h: def.h,
+      jumped: false,   // has the dino already jumped for this one?
+      passed: false    // has it fully passed?
+    };
+  });
+
+  /* ---- SCORE DISPLAY ---- */
+  function updateScore(n){
+    scoreEl.textContent = String(Math.floor(n)).padStart(5,'0');
+  }
+
+  /* ---- DUST PUFF ---- */
+  function spawnDust(x){
+    for(let i=0;i<3;i++){
+      const d = document.createElement('div');
+      d.className = 'sdw-dust-puff';
+      d.style.left = (x + Math.random()*20 - 10) + 'px';
+      d.style.width = (4+Math.random()*8)+'px';
+      d.style.height = d.style.width;
+      dustWrap.appendChild(d);
+      setTimeout(()=>d.remove(), 420);
     }
-    x+=speed*dt;
-    if(x>window.innerWidth+100)x=-100;
-    runnerDiv.style.left=x+'px';
-    
-    cactX=cactX.map((cx,i)=>{
-      cx-=speed*dt;
-      if(cx<-50)cx=window.innerWidth+Math.random()*400+200;
-      cacti[i].style.left=cx+'px';
-      return cx;
-    });
-    requestAnimationFrame(loop);
   }
-  requestAnimationFrame(loop);
+
+  /* ---- JUMP ---- */
+  function triggerJump(){
+    if(isJumping) return;
+    isJumping = true;
+    jumpStart = performance.now();
+    spawnDust(DINO_X + 20);
+  }
+
+  /* ---- MAIN RAF LOOP ---- */
+  let rafId;
+  function tick(now){
+    rafId = requestAnimationFrame(tick);
+
+    const scrollY   = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPct = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0;
+
+    /* world X = scroll progress mapped to virtual world width */
+    const worldX = scrollPct * PAGE_WORLD_W;
+
+    /* ---- SCORE tied to scroll ---- */
+    score = scrollPct * 9999;
+    updateScore(score);
+
+    /* ---- CLOUD PARALLAX ---- */
+    clouds.forEach(c=>{
+      const cx = c.baseX - worldX * c.speed;
+      // wrap clouds
+      const wrapped = ((cx % (window.innerWidth + 100)) + window.innerWidth + 100) % (window.innerWidth + 100) - 80;
+      c.el.style.left = wrapped + 'px';
+    });
+
+    /* ---- POSITION OBSTACLES relative to dino ---- */
+    obstacles.forEach(obs=>{
+      const screenX = DINO_X + (obs.worldX - worldX);
+      obs.el.style.left  = screenX + 'px';
+
+      // show/hide based on screen position
+      const visible = screenX > -80 && screenX < window.innerWidth + 80;
+      obs.el.style.display = visible ? 'block' : 'none';
+
+      /* ---- JUMP TRIGGER ---- */
+      // jump when obstacle is ~160px ahead of dino (right side approach)
+      const TRIGGER_DIST = 160;
+      const dinoRight    = DINO_X + DINO_W;
+      const obsLeft      = screenX;
+      
+      if(!obs.jumped && !obs.passed && obsLeft > DINO_X && obsLeft < DINO_X + TRIGGER_DIST){
+        triggerJump();
+        obs.jumped = true;
+      }
+      // mark passed once obstacle left edge is behind dino
+      if(obs.jumped && screenX + obs.w < DINO_X - 10){
+        obs.passed = true;
+      }
+      // reset for re-encounters (scroll back then forward)
+      if(screenX > DINO_X + TRIGGER_DIST + 40){
+        obs.jumped = false;
+        obs.passed = false;
+      }
+    });
+
+    /* ---- JUMP ARC (smooth sine arc) ---- */
+    if(isJumping){
+      const elapsed = now - jumpStart;
+      const t       = elapsed / JUMP_DUR; // 0→1
+      if(t >= 1){
+        isJumping = false;
+        jumpY     = 0;
+        spawnDust(DINO_X + 20);
+      } else {
+        jumpY = JUMP_HEIGHT * Math.sin(t * Math.PI);
+      }
+    }
+
+    /* ---- APPLY DINO VERTICAL ---- */
+    dinoel.style.bottom = (32 + jumpY) + 'px';
+
+    /* ---- LEG ANIMATION: faster when scrolling fast ---- */
+    const scrollDelta = Math.abs(scrollY - lastScrollY);
+    const legRate     = isJumping ? 999 : Math.max(4, 14 - scrollDelta * 1.5);
+    legFrame++;
+    if(legFrame % Math.round(legRate) === 0){
+      legToggle = !legToggle;
+    }
+    dinoel.innerHTML = dinoSVG(legToggle, isJumping);
+
+    /* ---- HINT ---- */
+    if(scrollY > 30 && hintShown){
+      hintShown = false;
+      hintEl.classList.add('gone');
+    }
+
+    lastScrollY   = scrollY;
+    lastScrollTime = now;
+  }
+  requestAnimationFrame(tick);
+
+  /* ---- INIT DINO ---- */
+  dinoel.innerHTML = dinoSVG(false, false);
+
 })();
 
 /* ---- FLOATING MC CUBES (DOM) ---- */
