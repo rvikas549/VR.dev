@@ -189,12 +189,6 @@ a{color:var(--blue)}
 @keyframes bootFill{to{width:100%}}
 
 
-/* ===================== THREE CANVAS ===================== */
-#three-canvas{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  pointer-events:none;z-index:2;opacity:.85;transition:none;
-}
-
 /* ===================== NAV ===================== */
 nav{
   position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:55;
@@ -294,15 +288,30 @@ section{
 
 /* ===================== HERO ===================== */
 #hero{
-  min-height:100svh;justify-content:center;text-align:center;
-  padding-top:calc(var(--nav-h) + 2rem);
+  min-height:100svh;justify-content:center;
+  padding-top:calc(var(--nav-h) + 1.2rem);padding-bottom:2.4rem;
+  overflow:hidden;
 }
+#hero::before{
+  content:'';position:absolute;z-index:-1;pointer-events:none;
+  right:-8%;top:10%;width:62%;height:78%;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--blue) 15%,transparent),transparent 74%);
+}
+@supports not (background:color-mix(in srgb,red 50%,blue)){
+  #hero::before{background:radial-gradient(closest-side,rgba(79,195,247,.14),transparent 74%)}
+}
+.hero-grid{
+  width:100%;max-width:1220px;
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  align-items:center;gap:clamp(1rem,3vw,3rem);
+}
+.hero-copy{text-align:left;position:relative;z-index:2}
 .badge{
   display:inline-flex;align-items:center;gap:.55rem;
   font-family:'Share Tech Mono',monospace;font-size:.7rem;
   letter-spacing:.14em;text-transform:uppercase;
   color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,transparent);
-  border:1px solid var(--line-2);padding:.38rem .85rem;margin-bottom:1.5rem;
+  border:1px solid var(--line-2);padding:.38rem .85rem;margin-bottom:1.4rem;
 }
 @supports not (background:color-mix(in srgb,red 50%,blue)){.badge{background:rgba(79,195,247,.1)}}
 .badge .dot{
@@ -314,14 +323,14 @@ section{
 .hero-tag{
   font-family:'Share Tech Mono',monospace;font-size:.8rem;
   color:var(--blue);letter-spacing:.2em;text-transform:lowercase;
-  margin-bottom:.9rem;min-height:1.2em;
+  margin-bottom:.8rem;min-height:1.2em;
 }
 .hero-tag .caret{animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
 
 .hero-name{
   font-family:'VT323',monospace;
-  font-size:clamp(4.2rem,15vw,10.5rem);
+  font-size:clamp(4.2rem,9.4vw,9.4rem);
   line-height:.86;letter-spacing:.01em;
   color:var(--text);
   text-shadow:
@@ -336,27 +345,46 @@ section{
 
 .hero-role{
   font-family:'Rajdhani',sans-serif;font-weight:700;
-  font-size:clamp(1.05rem,3.6vw,1.75rem);
+  font-size:clamp(1rem,2.1vw,1.6rem);
   letter-spacing:.22em;text-transform:uppercase;
-  color:var(--grey);margin:1.1rem 0 1.3rem;
+  color:var(--grey);margin:1rem 0 1.2rem;
 }
 html[data-theme="light"] .hero-role{color:#50606d}
 
 .hero-desc{
-  max-width:620px;margin:0 auto 2.2rem;
+  max-width:560px;margin:0 0 2rem;
   color:var(--mute);font-size:1.07rem;line-height:1.72;
 }
 .hero-desc b{color:var(--text);font-weight:600}
-.hero-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.hero-btns{display:flex;gap:.7rem;flex-wrap:wrap}
+.hero-copy .hero-btns .mcbtn{padding:.75rem 1.1rem}
 
 .scroll-hint{
-  margin-top:3rem;
+  margin-top:2.4rem;
   font-family:'Share Tech Mono',monospace;font-size:.74rem;
   color:var(--faint);letter-spacing:.17em;text-transform:uppercase;
-  display:flex;align-items:center;gap:.6rem;justify-content:center;
+  display:flex;align-items:center;gap:.6rem;
 }
 .scroll-hint .arw{animation:bobdown 1.6s ease-in-out infinite}
 @keyframes bobdown{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(5px);opacity:1}}
+
+/* contained 3D island — never sits behind text */
+.hero-stage{
+  position:relative;width:100%;max-width:600px;aspect-ratio:1/1;justify-self:center;
+}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.stage-tag{
+  position:absolute;left:50%;bottom:1%;transform:translateX(-50%);
+  font-family:'Share Tech Mono',monospace;font-size:.64rem;
+  letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;
+  color:var(--faint);pointer-events:none;
+  padding:.3rem .7rem;border:1px solid var(--line);background:var(--bg-2);
+}
+.stage-tag b{color:var(--blue);font-weight:400}
+.hero-fallback{position:absolute;inset:10%;display:none;place-items:center}
+.hero-fallback svg{width:62%;height:auto;color:var(--dino);filter:drop-shadow(0 18px 30px rgba(0,0,0,.4))}
+html.no-3d #hero-canvas,html.no-3d .stage-tag{display:none}
+html.no-3d .hero-fallback{display:grid}
 
 /* ===================== TICKER ===================== */
 .ticker-wrap{
@@ -411,94 +439,217 @@ html[data-theme="light"] .block{box-shadow:inset 0 1px 0 #fff,0 6px 20px rgba(20
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1)}
 .reveal.in{opacity:1;transform:none}
 
-/* ===================== ABOUT ===================== */
-.about-grid{
-  display:grid;grid-template-columns:minmax(280px,360px) 1fr;
-  gap:clamp(1.5rem,4vw,3.2rem);align-items:start;
+/* ===================== ABOUT — scroll story =====================
+   Default = static layout (reduced motion / no WebGL / no JS).
+   JS adds .is-live + one of .mode-wide | .mode-side | .mode-stack.   */
+#about{display:block;padding:0;scroll-margin-top:var(--nav-h)}
+.scene-track{position:relative}
+.scene-anchor{
+  position:absolute;left:0;top:0;width:1px;height:1px;
+  scroll-margin-top:var(--nav-h);pointer-events:none;
 }
-.player-card{
-  background:var(--surface);border:1px solid var(--line);
-  box-shadow:inset 0 1px 0 var(--bevel-lt),0 14px 40px rgba(0,0,0,.3);
-  overflow:hidden;position:sticky;top:calc(var(--nav-h) + 1.5rem);
+.scene-stage{
+  position:relative;max-width:1120px;margin:0 auto;
+  padding:clamp(4.5rem,10vh,7rem) clamp(1rem,5vw,2rem);
 }
-.player-card-top{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.6rem .9rem;background:var(--surface-2);
-  border-bottom:1px solid var(--line);
-  font-family:'Share Tech Mono',monospace;font-size:.68rem;
-  letter-spacing:.14em;color:var(--faint);text-transform:uppercase;
-}
-.player-card-top .live{display:flex;align-items:center;gap:.4rem;color:var(--blue)}
-.player-card-top .live i{width:6px;height:6px;background:var(--blue);display:block;animation:pulse 1.9s ease-in-out infinite}
-#steve-canvas{display:block;width:100%;height:330px;background:
-  radial-gradient(ellipse 70% 55% at 50% 42%,color-mix(in srgb,var(--blue) 13%,transparent),transparent 70%),
-  var(--bg-2);
-}
-@supports not (background:color-mix(in srgb,red 50%,blue)){
-  #steve-canvas{background:radial-gradient(ellipse 70% 55% at 50% 42%,rgba(79,195,247,.13),transparent 70%),var(--bg-2)}
-}
-.steve-fallback{
-  display:none;height:330px;place-items:center;background:var(--bg-2);
-  font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--faint);
-}
-.player-card-foot{
-  padding:.85rem .95rem;border-top:1px solid var(--line);
-  display:flex;flex-direction:column;gap:.5rem;
-}
-.hpbar{display:flex;align-items:center;gap:.6rem;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--faint);letter-spacing:.1em}
-.hpbar .track{flex:1;height:8px;background:var(--surface-3);border:1px solid var(--line)}
-.hpbar .track i{display:block;height:100%;background:linear-gradient(90deg,var(--blue-dp),var(--blue));width:var(--w,100%)}
+#scene-canvas{display:none}
+.scene-head{text-align:center;margin-bottom:2rem}
+.scene-fallback{display:flex;justify-content:center;margin:0 0 1.6rem}
+.scene-fallback svg{width:clamp(110px,16vw,150px);height:auto;filter:drop-shadow(0 14px 24px rgba(0,0,0,.35))}
+.scene-ui{position:relative}
 
-.about-text p{color:var(--mute);margin-bottom:1.05rem;font-size:1.06rem;line-height:1.75}
-.about-text p b{color:var(--text);font-weight:600}
-.about-text p .hl{color:var(--blue);font-weight:600}
+.scene-bio{max-width:760px;margin:0 auto 2.4rem;text-align:center}
+.scene-bio p{color:var(--mute);font-size:1.06rem;line-height:1.72;margin-bottom:.9rem}
+.scene-bio p b{color:var(--text);font-weight:600}
+.scene-bio .hl{color:var(--blue);font-weight:600}
+.bag-hint{
+  display:none;margin-top:1.1rem;
+  font-family:'Share Tech Mono',monospace;font-size:.7rem !important;
+  color:var(--blue) !important;letter-spacing:.14em;text-transform:uppercase;
+}
+.bag-hint span{display:inline-block;animation:bobdown 1.6s ease-in-out infinite}
 
 .stat-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));
-  gap:.7rem;margin-top:1.8rem;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:.6rem;margin-top:1.3rem;
 }
 .stat{
   background:var(--surface);border:1px solid var(--line);
-  padding:.95rem 1rem;box-shadow:inset 0 1px 0 var(--bevel-lt);
-  transition:transform .18s,border-color .18s;
+  padding:.8rem .85rem;box-shadow:inset 0 1px 0 var(--bevel-lt);
+  text-align:left;
 }
-.stat:hover{transform:translateY(-3px);border-color:var(--line-2)}
-.stat .n{
-  font-family:'VT323',monospace;font-size:2.1rem;line-height:1;
-  color:var(--blue);
-}
+.stat .n{font-family:'VT323',monospace;font-size:2rem;line-height:1;color:var(--blue)}
 .stat .l{
-  font-family:'Share Tech Mono',monospace;font-size:.65rem;
-  color:var(--faint);letter-spacing:.11em;text-transform:uppercase;margin-top:.3rem;
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;
+  color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:.25rem;
 }
 
-/* ===================== SKILLS (inventory hotbar) ===================== */
-.inv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(296px,1fr));gap:1rem}
-.inv{
-  background:var(--surface);border:1px solid var(--line);
-  box-shadow:inset 0 1px 0 var(--bevel-lt);
-  padding:1.25rem 1.2rem 1.35rem;
-  transition:transform .2s,border-color .2s,box-shadow .2s;
+.scene-cards{display:grid;gap:1.1rem}
+.skill-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+.scene-cards .scene-anchor{position:static;display:block;width:auto;height:0}
+.scene-quest{display:none}
+
+/* ---- résumé: a sheet of paper that comes out of the bag ---- */
+.paper{
+  position:relative;background:#f3f6f8;color:#1c252c;
+  padding:1.25rem 1.4rem 1.05rem;
+  box-shadow:0 22px 60px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.06);
+  clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,0 100%);
 }
-.inv:hover{
-  transform:translateY(-5px);border-color:var(--line-2);
-  box-shadow:inset 0 1px 0 var(--bevel-lt),0 14px 34px rgba(0,0,0,.3);
+.paper::after{
+  content:'';position:absolute;top:0;right:0;width:24px;height:24px;
+  background:linear-gradient(225deg,transparent 50%,#c9d3da 50%);
 }
-.inv-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
-.inv-head svg{width:22px;height:22px;color:var(--blue);flex:0 0 auto}
-.inv-head h3{
-  font-family:'Share Tech Mono',monospace;font-size:.78rem;font-weight:400;
-  letter-spacing:.15em;text-transform:uppercase;color:var(--text);
+html[data-theme="light"] .paper{background:#fff;box-shadow:0 16px 44px rgba(20,40,60,.18),inset 0 0 0 1px rgba(20,40,60,.14)}
+.rc-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;
+  border-bottom:2px solid #1c252c;padding-bottom:.55rem;margin-bottom:.8rem;
 }
-.slots{display:flex;flex-wrap:wrap;gap:.45rem}
+.rc-head h3{font-family:'VT323',monospace;font-weight:400;font-size:2.2rem;line-height:.85;color:#0f1a21}
+.rc-head p{
+  font-family:'Share Tech Mono',monospace;font-size:.66rem;letter-spacing:.12em;
+  text-transform:uppercase;color:#1c7fb6;margin-top:.35rem;
+}
+.rc-file{
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.12em;
+  color:#5a6670;border:1px dashed #9aa6b1;padding:.25rem .5rem;white-space:nowrap;margin-right:1rem;
+}
+.rc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem 1.4rem}
+.rc-block h4{
+  font-family:'Share Tech Mono',monospace;font-weight:400;font-size:.62rem;
+  letter-spacing:.16em;text-transform:uppercase;color:#5a6670;margin-bottom:.25rem;
+}
+.rc-block p{font-size:.93rem;line-height:1.42;color:#2b363e}
+.rc-block p b{color:#0f1a21;font-weight:700}
+.rc-block .rc-meta{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#5a6670;margin:.1rem 0 .3rem}
+.rc-foot{
+  display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;
+  margin-top:.9rem;padding-top:.8rem;border-top:1px dashed #b8c2c9;
+}
+.rc-foot a{
+  font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;text-decoration:none;padding:.48rem .8rem;
+  color:#0f1a21;border:2px solid #0f1a21;transition:background .15s,color .15s;
+}
+.rc-foot a:hover{background:#0f1a21;color:#f3f6f8}
+.rc-foot a.dl{background:#1c7fb6;color:#fff;border-color:#1c7fb6}
+.rc-foot a.dl:hover{background:#0e5a84;border-color:#0e5a84}
+.rc-stamp{
+  margin-left:auto;font-family:'VT323',monospace;font-size:1.15rem;line-height:1;
+  color:#1c7fb6;border:2px solid #1c7fb6;padding:.15rem .45rem;
+  transform:rotate(-7deg);opacity:.8;white-space:nowrap;
+}
+
+/* ---- skill cards: Minecraft item-tooltip style ---- */
+.skill-card{
+  border:2px solid transparent;
+  background:
+    linear-gradient(var(--surface),var(--surface)) padding-box,
+    linear-gradient(160deg,var(--blue-lt),var(--blue-deep) 55%,var(--grey-dk)) border-box;
+  padding:1.05rem 1.1rem 1.05rem;
+  box-shadow:0 18px 44px rgba(0,0,0,.42);
+}
+html[data-theme="light"] .skill-card{box-shadow:0 12px 32px rgba(20,40,60,.14)}
+.sk-top{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem}
+.sk-ico{
+  width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--line-2);color:var(--blue);
+}
+.sk-ico svg{width:22px;height:22px}
+.sk-title{font-family:'VT323',monospace;font-weight:400;font-size:1.8rem;line-height:.9;color:var(--text)}
+.sk-class{
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--blue);margin-top:.2rem;
+}
+.sk-desc{color:var(--mute);font-size:.9rem;line-height:1.5;margin-bottom:.7rem}
+.slots{display:flex;flex-wrap:wrap;gap:.35rem}
 .slot{
-  font-family:'Share Tech Mono',monospace;font-size:.72rem;
-  color:var(--mute);padding:.34rem .62rem;
+  font-family:'Share Tech Mono',monospace;font-size:.66rem;
+  color:var(--mute);padding:.24rem .5rem;
   background:var(--surface-2);
   border:2px solid;border-color:var(--bevel-lt) var(--bevel-dk) var(--bevel-dk) var(--bevel-lt);
-  transition:color .16s,background .16s,transform .16s;
 }
-.slot:hover{color:var(--blue);background:var(--surface-3);transform:translateY(-2px)}
+.sk-foot{
+  margin-top:.7rem;padding-top:.55rem;border-top:1px solid var(--line);
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--faint);letter-spacing:.08em;
+}
+
+/* ===== LIVE: pinned, scroll-scrubbed ===== */
+.about-scene.is-live .scene-track{height:390vh}
+.about-scene.is-live .scene-stage{
+  position:sticky;top:var(--nav-h);
+  height:calc(100vh - var(--nav-h) - var(--dino-h));
+  height:calc(100svh - var(--nav-h) - var(--dino-h));
+  max-width:none;margin:0;padding:0;overflow:hidden;
+}
+.is-live #scene-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.is-live .scene-fallback{display:none}
+.is-live .scene-head{position:absolute;left:0;right:0;top:clamp(.6rem,2.4vh,1.6rem);margin:0;z-index:4;pointer-events:none}
+.is-live .scene-head .sec-title{font-size:clamp(2.1rem,5vw,3.5rem)}
+.is-live .scene-ui{position:absolute;z-index:3}
+.is-live .scene-bio{position:absolute;left:0;right:0;margin:0;text-align:left;max-width:none;will-change:transform,opacity}
+.is-live .bag-hint{display:block}
+.is-live .scene-cards{position:absolute;inset:0;display:block}
+.is-live .pop-card{opacity:0;visibility:hidden;will-change:transform,opacity}
+.pop-card{position:relative}
+.is-live .pop-card::after{content:'';position:absolute;inset:-2px;background:var(--bg);opacity:var(--dim,0);pointer-events:none}
+.is-live .scene-quest{
+  display:flex;position:absolute;z-index:4;list-style:none;gap:1.05rem;
+  left:clamp(1rem,3vw,2.4rem);bottom:.8rem;
+  font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);pointer-events:none;
+}
+.scene-quest li{display:flex;align-items:center;gap:.42rem;transition:color .25s}
+.scene-quest li::before{content:'';width:8px;height:8px;border:1px solid currentColor;transition:background .25s,box-shadow .25s}
+.scene-quest li.done{color:var(--mute)}
+.scene-quest li.done::before{background:var(--mute)}
+.scene-quest li.on{color:var(--blue)}
+.scene-quest li.on::before{background:var(--blue);box-shadow:0 0 10px var(--glow)}
+
+/* wide: character left · résumé centre-right, then three skill cards side by side */
+.mode-wide .scene-ui{top:clamp(5.6rem,13.5vh,8rem);bottom:clamp(2.8rem,7vh,3.8rem);left:41%;right:clamp(1.2rem,3.5vw,3rem)}
+.mode-wide .scene-bio{top:50%;max-width:600px}
+.mode-wide .scene-cards{display:grid;place-items:center;transform:scale(var(--fit,1));transform-origin:center center}
+.mode-wide .resume-card{grid-area:1/1;width:min(660px,100%)}
+.mode-wide .skill-row{grid-area:1/1;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem;align-items:stretch}
+.mode-wide .pop-card{transform-origin:50% 50%}
+
+/* side: character left · one card at a time on the right (tablets, small laptops) */
+.mode-side .scene-ui{top:clamp(5.6rem,13vh,8rem);bottom:clamp(2.8rem,7vh,3.8rem);left:41%;right:clamp(1rem,3vw,2rem)}
+.mode-side .scene-bio{top:50%}
+.mode-side .skill-row{display:contents}
+.mode-side .pop-card{position:absolute;left:0;right:0;top:50%;transform-origin:50% 50%}
+
+/* stack: character on top · a deck of cards below (phones) */
+.mode-stack .scene-ui{left:.85rem;right:.85rem;top:45%;bottom:2.1rem}
+.mode-stack .scene-bio{
+  bottom:0;transform-origin:50% 100%;
+  background:var(--surface);border:1px solid var(--line);padding:.9rem 1rem .85rem;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+.mode-stack .scene-bio p{font-size:.93rem;line-height:1.58;margin-bottom:.5rem}
+.mode-stack .stat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:.35rem;margin-top:.6rem}
+.mode-stack .stat{padding:.45rem .4rem}
+.mode-stack .stat .n{font-size:1.45rem}
+.mode-stack .stat .l{font-size:.5rem;letter-spacing:.05em}
+.mode-stack .bag-hint{margin-top:.6rem}
+.mode-stack .skill-row{display:contents}
+.mode-stack .pop-card{position:absolute;left:0;right:0;bottom:0;transform-origin:50% 100%}
+.mode-stack .scene-quest{left:0;right:0;justify-content:center;bottom:.6rem;gap:.55rem}
+.mode-stack .scene-quest li{font-size:0;gap:0}
+.mode-stack .scene-quest li::before{width:9px;height:9px}
+.mode-stack .paper{padding:.9rem 1rem .8rem}
+.mode-stack .rc-head h3{font-size:1.75rem}
+.mode-stack .rc-grid{grid-template-columns:1fr;gap:.5rem}
+.mode-stack .rc-block p{font-size:.85rem}
+.mode-stack .rc-stamp{display:none}
+.mode-stack .skill-card{padding:.85rem .9rem}
+.mode-stack .sk-desc{font-size:.84rem;margin-bottom:.55rem}
+.mode-stack .sk-title{font-size:1.6rem}
+@media (max-height:720px){
+  .mode-stack .scene-ui{top:41%}
+  .mode-stack .bio-2{display:none}
+}
 
 /* ===================== PROJECTS (3D flip) ===================== */
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(318px,1fr));gap:1.4rem}
@@ -688,7 +839,8 @@ html[data-theme="light"] #dino{filter:drop-shadow(0 2px 6px rgba(255,255,255,.85
 #dino svg.on{display:block}
 #dino.boing{filter:drop-shadow(0 0 10px var(--glow))}
 
-.obs{position:absolute;bottom:28px;will-change:transform}
+.obs{position:absolute;bottom:28px;will-change:transform;transition:opacity .25s}
+.obs.off{opacity:0}
 .obs svg{display:block}
 .obs.hit svg{filter:drop-shadow(0 0 8px var(--glow))}
 
@@ -710,9 +862,16 @@ html[data-theme="light"] #dino{filter:drop-shadow(0 2px 6px rgba(255,255,255,.85
 #hud .hint.off{display:none}
 
 /* ===================== RESPONSIVE ===================== */
-@media (max-width:980px){
-  .about-grid{grid-template-columns:1fr}
-  .player-card{position:static;max-width:420px;margin:0 auto}
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:.4rem}
+  .hero-copy{text-align:center}
+  .hero-desc{margin:0 auto 1.8rem}
+  .hero-btns,.scroll-hint{justify-content:center}
+  .hero-stage{order:-1;max-width:460px;aspect-ratio:auto;height:clamp(230px,38vh,340px)}
+  .hero-name{font-size:clamp(3.8rem,17vw,6.8rem)}
+  .badge{margin-bottom:1rem}
+  #hero::before{right:auto;left:10%;top:3%;width:80%;height:42%}
+  .scroll-hint{margin-top:1.8rem}
 }
 @media (max-width:768px){
   :root{--dino-h:96px}
@@ -732,11 +891,20 @@ html[data-theme="light"] #dino{filter:drop-shadow(0 2px 6px rgba(255,255,255,.85
   #ground{bottom:22px}#ground-dots{bottom:15px}
   .obs{bottom:24px}.puff{bottom:22px}
   #hud{font-size:.65rem;gap:.8rem;top:8px}
+  .rc-grid{grid-template-columns:1fr}
+}
+/* phones: the runner does three laps and its jump stays inside the strip */
+@media (max-width:559px){
+  :root{--dino-h:104px}
+  #dino{width:36px;height:39px;bottom:22px}
+  #ground{bottom:20px}#ground-dots{bottom:13px}
+  .obs{bottom:22px}.puff{bottom:20px}
+  #hud{top:auto;bottom:0;right:.6rem;padding:0;font-size:.56rem;gap:.7rem;background:transparent}
+  .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:420px){
   section{padding-left:1rem;padding-right:1rem}
-  .hero-btns .mcbtn{padding:.7rem 1.1rem;font-size:.74rem}
-  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-btns .mcbtn{padding:.7rem 1.05rem;font-size:.72rem}
 }
 
 /* ===================== REDUCED MOTION ===================== */
@@ -747,15 +915,14 @@ html[data-theme="light"] #dino{filter:drop-shadow(0 2px 6px rgba(255,255,255,.85
     transition-duration:.001ms!important;
   }
   .reveal{opacity:1;transform:none}
-  #three-canvas{display:none}
   .ticker{animation:none;transform:none}
   #dino-world{display:none}
   body{padding-bottom:0}
 }
-html.no-motion #three-canvas{display:none}
 html.no-motion #dino-world{display:none}
 html.no-motion body{padding-bottom:0}
 </style>
+<noscript><style>.hero-fallback{display:grid!important}#hero-canvas,.stage-tag{display:none!important}</style></noscript>
 </head>
 <body>
 
@@ -777,7 +944,6 @@ html.no-motion body{padding-bottom:0}
 
 <div id="cursor" aria-hidden="true"></div>
 <div id="cursor-dot" aria-hidden="true"></div>
-<canvas id="three-canvas" aria-hidden="true"></canvas>
 
 <noscript>
   <div style="position:relative;z-index:10;background:#121a20;border:1px solid rgba(120,195,240,.3);padding:1rem;margin:5rem auto 0;max-width:720px;text-align:center;font-family:monospace;color:#e9eef2">
@@ -823,35 +989,53 @@ html.no-motion body{padding-bottom:0}
 
 <!-- ============ HERO ============ -->
 <section id="hero">
-  <div class="wrap">
-    <span class="badge"><span class="dot" aria-hidden="true"></span>Open to Full Stack / SDE roles · Bengaluru</span>
-    <p class="hero-tag" id="hero-tag" aria-label="full stack · devops · bengaluru"></p>
-    <h1 class="hero-name"><em>Vikas</em> R</h1>
-    <p class="hero-role">Full Stack DevOps Engineer</p>
-    <p class="hero-desc">
-      I build scalable web applications, RESTful APIs and production-grade CI/CD pipelines —
-      <b>React</b> and <b>Node.js</b> up front, <b>PostgreSQL</b>, <b>Docker</b> and <b>GitHub Actions</b> behind them.
-      <b>65+ pull requests</b> shipped in a production codebase.
-    </p>
-    <div class="hero-btns">
-      <a href="#projects" class="mcbtn primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
-        View Projects
-      </a>
-      <a href="./Vikas_R_Resume.pdf" class="mcbtn" download>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></svg>
-        Résumé
-      </a>
-      <a href="https://github.com/rvikas549" target="_blank" rel="noopener" class="mcbtn">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.9 5.3.9 11.6c0 4.9 3.2 9.1 7.6 10.5.6.1.8-.2.8-.6v-2c-3.1.7-3.7-1.5-3.7-1.5-.5-1.3-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 1.7 2.6 1.2 3.2.9.1-.7.4-1.2.7-1.5-2.5-.3-5.1-1.2-5.1-5.5 0-1.2.4-2.2 1.1-3-.1-.3-.5-1.4.1-2.9 0 0 .9-.3 3 1.1a10.4 10.4 0 0 1 5.5 0c2.1-1.4 3-1.1 3-1.1.6 1.5.2 2.6.1 2.9.7.8 1.1 1.8 1.1 3 0 4.3-2.6 5.2-5.1 5.5.4.4.8 1.1.8 2.2v3.2c0 .4.2.7.8.6 4.4-1.4 7.6-5.6 7.6-10.5C23.1 5.3 18.3.5 12 .5Z"/></svg>
-        GitHub
-      </a>
-      <a href="https://www.linkedin.com/in/vikas-r-7a6b88251/" target="_blank" rel="noopener" class="mcbtn">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.1a4.2 4.2 0 0 1 3.8-2.1c4 0 4.3 2.6 4.3 6V21h-4v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9V21h-4V9Z"/></svg>
-        LinkedIn
-      </a>
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <span class="badge"><span class="dot" aria-hidden="true"></span>Open to Full Stack / SDE roles · Bengaluru</span>
+      <p class="hero-tag" id="hero-tag" aria-label="full stack · devops · bengaluru"></p>
+      <h1 class="hero-name"><em>Vikas</em> R</h1>
+      <p class="hero-role">Full Stack DevOps Engineer</p>
+      <p class="hero-desc">
+        I build scalable web applications, RESTful APIs and production-grade CI/CD pipelines —
+        <b>React</b> and <b>Node.js</b> up front, <b>PostgreSQL</b>, <b>Docker</b> and <b>GitHub Actions</b> behind them.
+        <b>65+ pull requests</b> shipped in a production codebase.
+      </p>
+      <div class="hero-btns">
+        <a href="#projects" class="mcbtn primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+          View Projects
+        </a>
+        <a href="./Vikas_R_Resume.pdf" class="mcbtn" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></svg>
+          Résumé
+        </a>
+        <a href="https://github.com/rvikas549" target="_blank" rel="noopener" class="mcbtn">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.9 5.3.9 11.6c0 4.9 3.2 9.1 7.6 10.5.6.1.8-.2.8-.6v-2c-3.1.7-3.7-1.5-3.7-1.5-.5-1.3-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 1.7 2.6 1.2 3.2.9.1-.7.4-1.2.7-1.5-2.5-.3-5.1-1.2-5.1-5.5 0-1.2.4-2.2 1.1-3-.1-.3-.5-1.4.1-2.9 0 0 .9-.3 3 1.1a10.4 10.4 0 0 1 5.5 0c2.1-1.4 3-1.1 3-1.1.6 1.5.2 2.6.1 2.9.7.8 1.1 1.8 1.1 3 0 4.3-2.6 5.2-5.1 5.5.4.4.8 1.1.8 2.2v3.2c0 .4.2.7.8.6 4.4-1.4 7.6-5.6 7.6-10.5C23.1 5.3 18.3.5 12 .5Z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/vikas-r-7a6b88251/" target="_blank" rel="noopener" class="mcbtn">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.1a4.2 4.2 0 0 1 3.8-2.1c4 0 4.3 2.6 4.3 6V21h-4v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9V21h-4V9Z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+      <p class="scroll-hint"><span class="arw" aria-hidden="true">↓</span> Scroll to Explore &amp; Play <span class="arw" aria-hidden="true">↓</span></p>
     </div>
-    <p class="scroll-hint"><span class="arw" aria-hidden="true">↓</span> Scroll to Explore &amp; Play <span class="arw" aria-hidden="true">↓</span></p>
+
+    <div class="hero-stage" id="hero-stage">
+      <canvas id="hero-canvas" role="img" aria-label="Interactive 3D voxel island with a T-Rex, a tree and a Minecraft-style character. Click it to make the dino jump."></canvas>
+      <div class="hero-fallback" aria-hidden="true">
+        <svg viewBox="0 0 24 26" shape-rendering="crispEdges" fill="currentColor">
+          <rect x="0" y="9" width="5" height="3"/><rect x="3" y="11" width="5" height="3"/>
+          <rect x="6" y="11" width="10" height="7"/><rect x="8" y="9" width="7" height="3"/>
+          <rect x="13" y="6" width="4" height="6"/><rect x="15" y="1" width="8" height="6"/>
+          <rect x="19" y="7" width="5" height="2"/><rect x="15" y="13" width="4" height="2"/>
+          <rect x="7" y="18" width="3" height="6"/><rect x="6" y="23" width="5" height="3"/>
+          <rect x="12" y="18" width="3" height="6"/><rect x="11" y="23" width="5" height="3"/>
+          <rect x="20" y="3" width="2" height="2" style="fill:var(--blue)"/>
+        </svg>
+      </div>
+      <span class="stage-tag" id="stage-tag">click the island · <b>the dino jumps</b></span>
+    </div>
   </div>
 </section>
 
@@ -860,115 +1044,137 @@ html.no-motion body{padding-bottom:0}
   <div class="ticker" id="ticker"></div>
 </div>
 
-<!-- ============ ABOUT ============ -->
-<section id="about">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <p class="sec-label">// player.info()</p>
-      <h2 class="sec-title">About Me</h2>
-      <div class="sec-rule"></div>
-    </div>
-    <div class="about-grid">
-      <div class="player-card reveal">
-        <div class="player-card-top">
-          <span>Vikas_R</span>
-          <span class="live"><i aria-hidden="true"></i>Online</span>
-        </div>
-        <canvas id="steve-canvas" aria-label="3D voxel character of Vikas waving"></canvas>
-        <div class="steve-fallback" id="steve-fallback">// 3d scene unavailable</div>
-        <div class="player-card-foot">
-          <div class="hpbar"><span>STACK</span><span class="track"><i style="--w:100%"></i></span><span>FULL</span></div>
-          <div class="hpbar"><span>BUILD</span><span class="track"><i style="--w:100%"></i></span><span>SHIP</span></div>
-        </div>
-      </div>
-      <div class="about-text reveal">
-        <p>Hey — I'm <b>Vikas R</b>, a Full Stack and DevOps engineer based in <span class="hl">Bengaluru, India</span>.</p>
-        <p>I finished my <b>B.E. in Computer Science and Engineering</b> at JSS Academy of Technical Education in June 2026 with a <span class="hl">CGPA of 8.5/10</span>, and spent a year as a <b>React Developer Intern at Vizion Systems</b>, working on-site at the Bengaluru office of a UK-origin software firm.</p>
-        <p>My work sits across the stack: reusable React component libraries and Redux state on the front end, Node.js, Express and Spring Boot services backed by PostgreSQL and MongoDB behind them, and <span class="hl">Docker + GitHub Actions</span> pipelines to ship the whole thing. I'm strongest where frontend polish meets backend reliability.</p>
-        <p>Right now I'm looking for a <b>Full Stack Developer</b> or <b>Software Development Engineer</b> role where I can own features end to end.</p>
-        <div class="stat-grid">
-          <div class="stat"><div class="n">65+</div><div class="l">PRs merged</div></div>
-          <div class="stat"><div class="n">8.5</div><div class="l">CGPA / 10</div></div>
-          <div class="stat"><div class="n">5</div><div class="l">Major projects</div></div>
-          <div class="stat"><div class="n">1 yr</div><div class="l">Industry exp.</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- ============ ABOUT: scroll story — the bag opens, the résumé and skills pop out ============ -->
+<section id="about" class="about-scene" aria-label="About me">
+  <div class="scene-track" id="scene-track">
+    <span class="scene-anchor" id="skills" aria-hidden="true"></span>
+    <div class="scene-stage" id="scene-stage">
+      <canvas id="scene-canvas" aria-hidden="true"></canvas>
 
-<!-- ============ SKILLS ============ -->
-<section id="skills">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <p class="sec-label">// inventory.open()</p>
-      <h2 class="sec-title">Skills</h2>
-      <div class="sec-rule"></div>
-      <p class="sec-sub">Everything below is in active use — not a wishlist.</p>
-    </div>
-    <div class="inv-grid">
-      <div class="inv reveal">
-        <div class="inv-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="14" rx="1"/><path d="M8 21h8M12 17.5V21"/></svg>
-          <h3>Frontend</h3>
+      <div class="scene-head reveal">
+        <p class="sec-label">// player.info()</p>
+        <h2 class="sec-title">About Me</h2>
+      </div>
+
+      <div class="scene-fallback" aria-hidden="true">
+        <svg viewBox="0 0 26 36" shape-rendering="crispEdges">
+          <rect x="6" y="0" width="8" height="2" fill="#2f3a42"/>
+          <rect x="6" y="2" width="8" height="6" fill="#d9a884"/>
+          <rect x="6" y="2" width="8" height="1" fill="#2f3a42"/>
+          <rect x="7" y="4" width="1" height="1" fill="#f2f7fa"/><rect x="8" y="4" width="1" height="1" fill="#16222c"/>
+          <rect x="11" y="4" width="1" height="1" fill="#16222c"/><rect x="12" y="4" width="1" height="1" fill="#f2f7fa"/>
+          <rect x="9" y="6" width="2" height="1" fill="#a8735a"/>
+          <rect x="6" y="8" width="8" height="12" fill="#4fc3f7"/>
+          <rect x="9" y="11" width="2" height="2" fill="#cdedfd"/>
+          <rect x="2" y="8" width="4" height="4" fill="#3ba9dc"/><rect x="2" y="12" width="4" height="8" fill="#d9a884"/>
+          <rect x="14" y="8" width="4" height="4" fill="#3ba9dc"/><rect x="14" y="12" width="4" height="8" fill="#d9a884"/>
+          <rect x="6" y="20" width="4" height="10" fill="#37474f"/><rect x="10" y="20" width="4" height="10" fill="#37474f"/>
+          <rect x="6" y="30" width="4" height="2" fill="#222d35"/><rect x="10" y="30" width="4" height="2" fill="#222d35"/>
+          <rect x="16" y="19" width="1" height="2" fill="#1a232a"/><rect x="19" y="19" width="1" height="2" fill="#1a232a"/>
+          <rect x="16" y="19" width="4" height="1" fill="#1a232a"/>
+          <rect x="14" y="21" width="9" height="7" fill="#2c3a45"/>
+          <rect x="14" y="24" width="9" height="1" fill="#4fc3f7"/>
+          <rect x="15" y="21" width="1" height="1" fill="#cdedfd"/><rect x="21" y="21" width="1" height="1" fill="#cdedfd"/>
+        </svg>
+      </div>
+
+      <div class="scene-ui" id="scene-ui">
+        <div class="scene-bio" id="scene-bio">
+          <p>Hey — I'm <b>Vikas R</b>, a Full Stack &amp; DevOps engineer from <span class="hl">Bengaluru</span>. I graduated in <b>Computer Science and Engineering</b> from JSS Academy of Technical Education in 2026, after a year shipping production React at <b>Vizion Systems</b>.</p>
+          <p class="bio-2">I build across the stack — React front ends, Node.js and Spring Boot APIs, PostgreSQL and MongoDB, and the Docker + GitHub Actions pipelines that ship them. Now looking for a <b>Full Stack / SDE role</b>.</p>
+          <div class="stat-grid">
+            <div class="stat"><div class="n">65+</div><div class="l">PRs merged</div></div>
+            <div class="stat"><div class="n">8.5</div><div class="l">CGPA / 10</div></div>
+            <div class="stat"><div class="n">5</div><div class="l">Projects</div></div>
+            <div class="stat"><div class="n">1 yr</div><div class="l">Industry</div></div>
+          </div>
+          <p class="bag-hint"><span aria-hidden="true">↓</span>&nbsp; Keep scrolling — there's something in the bag</p>
         </div>
-        <div class="slots">
-          <span class="slot">React.js</span><span class="slot">TypeScript</span><span class="slot">JavaScript ES6+</span>
-          <span class="slot">Material UI</span><span class="slot">HTML / CSS</span><span class="slot">Bootstrap</span>
-          <span class="slot">EJS</span>
+
+        <div class="scene-cards" id="scene-cards">
+          <article class="pop-card resume-card" aria-label="Résumé summary">
+            <div class="paper">
+              <header class="rc-head">
+                <div>
+                  <h3>Vikas R</h3>
+                  <p>Full Stack DevOps Engineer · Bengaluru</p>
+                </div>
+                <span class="rc-file">VIKAS_R.PDF</span>
+              </header>
+              <div class="rc-grid">
+                <div class="rc-block">
+                  <h4>Experience</h4>
+                  <p><b>React Developer Intern</b>, Vizion Systems</p>
+                  <p class="rc-meta">Jun 2025 – May 2026 · Bengaluru</p>
+                  <p>65+ PRs · reusable component library (+40% reuse) · Redux + REST · GitHub Actions CI/CD</p>
+                </div>
+                <div class="rc-block">
+                  <h4>Education</h4>
+                  <p><b>B.E. Computer Science &amp; Engineering</b></p>
+                  <p class="rc-meta">JSS Academy of Technical Education · 2022 – 2026</p>
+                  <p>CGPA 8.5 / 10 · AWS Cloud Practitioner Essentials · NPTEL Machine Learning</p>
+                </div>
+              </div>
+              <div class="rc-foot">
+                <a class="dl" href="./Vikas_R_Resume.pdf" download>↓ Download PDF</a>
+                <a href="#experience">Full experience →</a>
+                <span class="rc-stamp" aria-hidden="true">OPEN TO WORK</span>
+              </div>
+            </div>
+          </article>
+
+          <div class="skill-row">
+            <article class="pop-card skill-card" aria-label="Full Stack skills">
+              <div class="sk-top">
+                <span class="sk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="14" rx="1"/><path d="M8 21h8M12 17.5V21M8.5 8.5 6 10.5l2.5 2M15.5 8.5l2.5 2-2.5 2"/></svg></span>
+                <div><h3 class="sk-title">Full Stack</h3><p class="sk-class">// class: builder</p></div>
+              </div>
+              <p class="sk-desc">React front ends on Node.js and Spring Boot APIs, backed by PostgreSQL and MongoDB.</p>
+              <div class="slots">
+                <span class="slot">React.js</span><span class="slot">TypeScript</span><span class="slot">JavaScript ES6+</span>
+                <span class="slot">Material UI</span><span class="slot">HTML / CSS</span><span class="slot">Bootstrap</span>
+                <span class="slot">EJS</span><span class="slot">Node.js</span><span class="slot">Express.js</span>
+                <span class="slot">Spring Boot</span><span class="slot">REST APIs</span><span class="slot">Socket.IO</span>
+                <span class="slot">PostgreSQL</span><span class="slot">MongoDB</span><span class="slot">Firestore</span>
+              </div>
+              <p class="sk-foot">shipped: CollabDocs · BGBT · Social Media Platform</p>
+            </article>
+
+            <article class="pop-card skill-card" aria-label="DevOps and Cloud skills">
+              <div class="sk-top">
+                <span class="sk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M6 17a4 4 0 0 1-.4-8 6 6 0 0 1 11.6-1.6A4.5 4.5 0 0 1 18 17H6Z"/><path d="M12 11v7M9 14l3-3 3 3"/></svg></span>
+                <div><h3 class="sk-title">DevOps &amp; Cloud</h3><p class="sk-class">// class: shipper</p></div>
+              </div>
+              <p class="sk-desc">Docker, GitHub Actions CI/CD and cloud deploys on Render, Vercel and AWS.</p>
+              <div class="slots">
+                <span class="slot">Docker</span><span class="slot">GitHub Actions</span><span class="slot">CI / CD</span>
+                <span class="slot">Linux</span><span class="slot">AWS</span><span class="slot">Shell Scripting</span>
+                <span class="slot">Render</span><span class="slot">Vercel</span><span class="slot">Cloudinary</span>
+                <span class="slot">Grafana</span><span class="slot">Git</span><span class="slot">GitHub</span>
+              </div>
+              <p class="sk-foot">65+ PRs through a Git branching workflow at Vizion</p>
+            </article>
+
+            <article class="pop-card skill-card" aria-label="Core computer science skills">
+              <div class="sk-top">
+                <span class="sk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4M10 10h4v4h-4z"/></svg></span>
+                <div><h3 class="sk-title">Core CS</h3><p class="sk-class">// class: engineer</p></div>
+              </div>
+              <p class="sk-desc">Data structures, algorithms and system-design fundamentals, applied in Agile teams.</p>
+              <div class="slots">
+                <span class="slot">Data Structures</span><span class="slot">Algorithms</span><span class="slot">Advanced Java</span>
+                <span class="slot">Collections</span><span class="slot">System Design</span><span class="slot">Agile / Scrum</span>
+                <span class="slot">Version Control</span><span class="slot">ML Models</span>
+              </div>
+              <p class="sk-foot">toolbelt: VS Code · Postman · Figma</p>
+            </article>
+          </div>
         </div>
       </div>
-      <div class="inv reveal">
-        <div class="inv-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M4 7.5h16v9H4zM4 12h16M7.5 9.6h.01M7.5 14.2h.01"/></svg>
-          <h3>Backend</h3>
-        </div>
-        <div class="slots">
-          <span class="slot">Node.js</span><span class="slot">Express.js</span><span class="slot">Spring Boot</span>
-          <span class="slot">REST APIs</span><span class="slot">Socket.IO</span><span class="slot">JWT / OAuth 2.0</span>
-        </div>
-      </div>
-      <div class="inv reveal">
-        <div class="inv-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
-          <h3>Databases</h3>
-        </div>
-        <div class="slots">
-          <span class="slot">PostgreSQL</span><span class="slot">MongoDB</span><span class="slot">Firestore</span>
-        </div>
-      </div>
-      <div class="inv reveal">
-        <div class="inv-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M6 17a4 4 0 0 1-.4-8 6 6 0 0 1 11.6-1.6A4.5 4.5 0 0 1 18 17H6Z"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>
-          <h3>DevOps &amp; Cloud</h3>
-        </div>
-        <div class="slots">
-          <span class="slot">Docker</span><span class="slot">GitHub Actions</span><span class="slot">CI / CD</span>
-          <span class="slot">Linux</span><span class="slot">AWS</span><span class="slot">Shell Scripting</span>
-          <span class="slot">Render</span><span class="slot">Vercel</span><span class="slot">Cloudinary</span>
-        </div>
-      </div>
-      <div class="inv reveal">
-        <div class="inv-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M14.5 6.5l3 3M3 21l3-9 9-9 3 3-9 9-6 6Z"/><path d="M16 3.5 20.5 8"/></svg>
-          <h3>Tools</h3>
-        </div>
-        <div class="slots">
-          <span class="slot">Git</span><span class="slot">GitHub</span><span class="slot">VS Code</span>
-          <span class="slot">Postman</span><span class="slot">Figma</span><span class="slot">Grafana</span>
-        </div>
-      </div>
-      <div class="inv reveal">
-        <div class="inv-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M9 7 4 12l5 5M15 7l5 5-5 5"/></svg>
-          <h3>Core &amp; Other</h3>
-        </div>
-        <div class="slots">
-          <span class="slot">Advanced Java</span><span class="slot">Collections</span><span class="slot">DSA</span>
-          <span class="slot">Version Control</span><span class="slot">ML Models</span><span class="slot">Agile</span>
-          <span class="slot">System Design</span>
-        </div>
-      </div>
+
+      <ol class="scene-quest" id="scene-quest" aria-hidden="true">
+        <li>Bio</li><li>Résumé</li><li>Full Stack</li><li>DevOps</li><li>Core CS</li>
+      </ol>
     </div>
   </div>
 </section>
@@ -1346,10 +1552,10 @@ html.no-motion body{padding-bottom:0}
 <script>
 /* =====================================================================
    VR.DEV runtime
-   1. prefs + theme      5. reveal / nav / xp
+   1. prefs + theme      5. reveal / nav / typing
    2. boot screen        6. project flip + tilt
-   3. ticker             7. scroll-scrubbed dino runner
-   4. cursor + sparks    8. three.js voxel scenes
+   3. ticker             7. scroll-scrubbed dino runner (3 laps on phones)
+   4. cursor + sparks    8. 3D: hero island + about scroll story
    ===================================================================== */
 (function(){
 'use strict';
@@ -1467,7 +1673,7 @@ if (!REDUCED && typeof Element.prototype.animate === 'function'){
   }, { passive: true });
 }
 
-/* ---------- 5. REVEAL / NAV / XP BAR / TYPING / YEAR ---------- */
+/* ---------- 5. REVEAL / NAV / TYPING / YEAR ---------- */
 (function(){
   var els = document.querySelectorAll('.reveal');
   if (!('IntersectionObserver' in window) || REDUCED){
@@ -1500,18 +1706,21 @@ if (!REDUCED && typeof Element.prototype.animate === 'function'){
   window.addEventListener('resize', function(){ if (window.innerWidth > 768) close(); });
 })();
 
+var NAVLINKS = Array.prototype.slice.call(document.querySelectorAll('.nav-links a'));
+var navCur = '';
+function markNav(id){
+  if (id === navCur) return;
+  navCur = id;
+  NAVLINKS.forEach(function(a){
+    if (a.getAttribute('href') === '#' + id) a.setAttribute('aria-current', 'true');
+    else a.removeAttribute('aria-current');
+  });
+}
 (function(){
-  var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a'));
   var secs = Array.prototype.slice.call(document.querySelectorAll('section[id]'));
   if (!('IntersectionObserver' in window)) return;
   var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if (!en.isIntersecting) return;
-      links.forEach(function(a){
-        if (a.getAttribute('href') === '#' + en.target.id) a.setAttribute('aria-current','true');
-        else a.removeAttribute('aria-current');
-      });
-    });
+    entries.forEach(function(en){ if (en.isIntersecting) markNav(en.target.id); });
   }, { threshold: 0, rootMargin: '-45% 0px -50% 0px' });
   secs.forEach(function(s){ io.observe(s); });
 })();
@@ -1559,13 +1768,13 @@ document.getElementById('year').textContent = new Date().getFullYear();
 })();
 
 /* ---------- 7. SCROLL-SCRUBBED DINO RUNNER ---------- *
- * dinoX   = PAD + travel * scrollProgress      (dino genuinely crosses the page)
- * obstacle i sits at scroll waypoint t_i, so signed distance
- *   d = travel * (p - t_i)
- * jump height is a pure function of d:
- *   h = JUMP_H * sin(pi * (d + SPAN) / (2*SPAN))   for |d| < SPAN
- * => no timers. Works with wheel, touch, keys, scrollbar drag and anchor
- *    jumps, and plays backwards when you scroll up.                       */
+ * The dino's world position X runs from X0 to X1 as the page scrolls.
+ * Screen x = (X mod LAP) - dinoW, so on phones the dino runs three laps
+ * (exits right, re-enters left): three times the distance, one jump per lap.
+ * Obstacle i sits at world Xi and the jump is a pure function of d = X - Xi:
+ *   h = JUMP_H * (1 - (d/SPAN)^2)   for |d| < SPAN
+ * No timers: wheel, touch, keys, scrollbar drag and anchor jumps all behave,
+ * and scrolling up plays the jump backwards.                                */
 if (!REDUCED) (function(){
   var world = document.getElementById('dino-world');
   var dinoEl = document.getElementById('dino');
@@ -1592,7 +1801,7 @@ if (!REDUCED) (function(){
   }
 
   var PAD = 16;
-  var dinoW, travel, JUMP_H, SPAN, MIN_GAP, obsScale;
+  var dinoW, travel, JUMP_H, SPAN, MIN_GAP, obsScale, LAPS, LAP, X0, X1;
   var OBS = [];
 
   var CACTUS = '<svg viewBox="0 0 10 17" width="W" height="H" shape-rendering="crispEdges">' +
@@ -1626,31 +1835,47 @@ if (!REDUCED) (function(){
   ];
 
   function measure(){
-    MOBILE = window.innerWidth < 769;
-    dinoW   = MOBILE ? 40 : 48;
-    JUMP_H  = MOBILE ? 74 : 92;
-    SPAN    = MOBILE ? 50 : 64;
-    MIN_GAP = MOBILE ? 230 : 340;
-    obsScale = MOBILE ? .8 : 1;
-    travel  = Math.max(60, window.innerWidth - dinoW - PAD * 2);
+    var vw = window.innerWidth;
+    MOBILE = vw < 769;
+    var narrow = vw < 560;
+    dinoW    = narrow ? 36 : MOBILE ? 40 : 48;
+    JUMP_H   = narrow ? 42 : MOBILE ? 74 : 92;   // narrow: apex stays inside the strip
+    SPAN     = narrow ? 54 : MOBILE ? 50 : 64;
+    MIN_GAP  = MOBILE ? 230 : 340;
+    obsScale = narrow ? .65 : MOBILE ? .8 : 1;
+    LAPS     = narrow ? 3 : 1;
+    travel   = Math.max(60, vw - dinoW - PAD * 2);
+    LAP      = vw + dinoW;                         // dino leaves the right edge, re-enters on the left
+    X0       = PAD + dinoW;                        // screen x = PAD at the top of the page
+    X1       = (LAPS - 1) * LAP + vw - PAD;        // screen x = right edge at the bottom
+  }
+  function screenX(X){ return ((X % LAP) + LAP) % LAP - dinoW; }
+  function lapOf(X){ return Math.floor(X / LAP); }
+
+  function addObstacle(X, kind){
+    var k = KINDS[kind % KINDS.length];
+    var w = Math.round(k.w * obsScale), h = Math.round(k.h * obsScale);
+    var el = document.createElement('div');
+    el.className = 'obs';
+    el.innerHTML = k.svg.replace('width="W"', 'width="' + w + '"').replace('height="H"', 'height="' + h + '"');
+    var left = screenX(X) + dinoW / 2 - w / 2;
+    el.style.transform = 'translate3d(' + left.toFixed(1) + 'px,0,0)';
+    obsWrap.appendChild(el);
+    OBS.push({ X: X, el: el, lap: lapOf(X), hot: false, off: false });
   }
 
   function buildObstacles(){
     OBS = [];
     obsWrap.innerHTML = '';
-    var n = clamp(Math.round(travel / MIN_GAP), 1, 10);
-    for (var i = 0; i < n; i++){
-      var t = (n === 1) ? .5 : .11 + (.87 - .11) * (i / (n - 1));
-      var k = KINDS[i % KINDS.length];
-      var w = Math.round(k.w * obsScale), h = Math.round(k.h * obsScale);
-      var el = document.createElement('div');
-      el.className = 'obs';
-      el.innerHTML = k.svg.replace('width="W"', 'width="' + w + '"').replace('height="H"', 'height="' + h + '"');
-      // centre the obstacle where the dino's centre will be at p === t
-      var left = PAD + travel * t + dinoW / 2 - w / 2;
-      el.style.transform = 'translate3d(' + left.toFixed(1) + 'px,0,0)';
-      obsWrap.appendChild(el);
-      OBS.push({ t: t, el: el, w: w, h: h, hot: false });
+    if (LAPS > 1){
+      var spots = [.5, .62, .42];            // one per lap: cactus, tree, double cactus
+      for (var l = 0; l < LAPS; l++) addObstacle(l * LAP + X0 + spots[l % 3] * travel, l % 3);
+    } else {
+      var n = clamp(Math.round(travel / MIN_GAP), 1, 10);
+      for (var i = 0; i < n; i++){
+        var t = (n === 1) ? .5 : .11 + (.87 - .11) * (i / (n - 1));
+        addObstacle(X0 + t * travel, i);
+      }
     }
   }
 
@@ -1682,27 +1907,26 @@ if (!REDUCED) (function(){
       e.preventDefault(); doHop();
     }
   });
-  world.style.pointerEvents = 'none';
   document.addEventListener('pointerdown', function(e){
     if (e.clientY > window.innerHeight - parseFloat(getComputedStyle(html).getPropertyValue('--dino-h'))) doHop();
   }, { passive: true });
 
-  /* dust puffs */
   var lastPuff = 0;
   function puff(x){
-    if (REDUCED || typeof Element.prototype.animate !== 'function') return;
+    if (typeof Element.prototype.animate !== 'function') return;
     var now = performance.now();
     if (now - lastPuff < 140) return;
     lastPuff = now;
     for (var i = 0; i < 3; i++){
       var p = document.createElement('div');
       p.className = 'puff';
-      p.style.transform = 'translate3d(' + (x + i * 6 - 6) + 'px,0,0)';
+      var x0 = x + i * 6 - 6;
+      p.style.transform = 'translate3d(' + x0 + 'px,0,0)';
       world.appendChild(p);
       var dx = -14 - Math.random() * 22, dy = -8 - Math.random() * 12;
       var a = p.animate([
-        { transform: 'translate3d(' + (x + i * 6 - 6) + 'px,0,0) scale(1)', opacity: .7 },
-        { transform: 'translate3d(' + (x + i * 6 - 6 + dx) + 'px,' + dy + 'px,0) scale(0)', opacity: 0 }
+        { transform: 'translate3d(' + x0 + 'px,0,0) scale(1)', opacity: .7 },
+        { transform: 'translate3d(' + (x0 + dx) + 'px,' + dy + 'px,0) scale(0)', opacity: 0 }
       ], { duration: 420, easing: 'ease-out', fill: 'forwards' });
       a.onfinish = (function(node){ return function(){ node.remove(); }; })(p);
     }
@@ -1718,27 +1942,25 @@ if (!REDUCED) (function(){
     if (document.hidden) return;
 
     var p = progress();
-    var x = PAD + travel * p;
+    var X = X0 + (X1 - X0) * p;
+    var x = screenX(X);
+    var lap = lapOf(X);
 
-    /* --- motion state from scroll distance, not a clock --- */
-    if (lastX === null) lastX = x;
-    var dx = x - lastX;
-    if (Math.abs(dx) > .12){ legPhase += Math.abs(dx); lastMove = now; }
-    lastX = x;
+    if (lastX === null) lastX = X;
+    var dX = X - lastX;
+    if (Math.abs(dX) > .12){ legPhase += Math.abs(dX); lastMove = now; }
+    lastX = X;
     var moving = (now - lastMove) < 150;
 
-    /* --- jump height: pure function of distance to nearest obstacle --- */
     var h = 0, near = null;
     for (var i = 0; i < OBS.length; i++){
-      var d = travel * (p - OBS[i].t);
+      var d = X - OBS[i].X;
       if (d > -SPAN && d < SPAN){
-        var u = d / SPAN;                      // -1 .. 1
-        var hh = JUMP_H * (1 - u * u);         // parabola: real jump arc, 0 at both ends
+        var u = d / SPAN;
+        var hh = JUMP_H * (1 - u * u);
         if (hh > h){ h = hh; near = OBS[i]; }
       }
     }
-
-    /* manual hop layers on top, never replaces the scrubbed arc */
     if (hop.on){
       var e = (now - hop.t0) / 470;
       if (e >= 1) hop.on = false;
@@ -1747,27 +1969,27 @@ if (!REDUCED) (function(){
 
     var up = h > 2;
     if (up !== airborne){ puff(x + dinoW * .25); airborne = up; }
-
-    /* --- sprite --- */
     setSprite(up ? 'jump' : (moving ? (Math.floor(legPhase / 19) % 2 ? 'run2' : 'run1') : 'idle'));
 
-    /* --- paint --- */
     var tr = 'translate3d(' + x.toFixed(1) + 'px,' + (-h).toFixed(1) + 'px,0)';
     if (tr !== appliedDino){ dinoEl.style.transform = tr; appliedDino = tr; }
     if (up) dinoEl.classList.add('boing'); else dinoEl.classList.remove('boing');
 
     for (var k = 0; k < OBS.length; k++){
-      var want = (OBS[k] === near && h > JUMP_H * .45);
-      if (want !== OBS[k].hot){ OBS[k].el.classList.toggle('hit', want); OBS[k].hot = want; }
+      var o = OBS[k];
+      var off = o.lap !== lap;
+      if (off !== o.off){ o.el.classList.toggle('off', off); o.off = off; }
+      var want = (o === near && h > JUMP_H * .45);
+      if (want !== o.hot){ o.el.classList.toggle('hit', want); o.hot = want; }
     }
 
-    var dp = (-travel * p).toFixed(0) + 'px';
+    var dp = (-X).toFixed(0) + 'px';
     if (dp !== appliedDots){ dots.style.backgroundPositionX = dp; appliedDots = dp; }
 
     var vwp = window.innerWidth + 120;
     for (var c = 0; c < CLOUDS.length; c++){
       var cl = CLOUDS[c];
-      var cxp = ((cl.base - travel * p * cl.depth) % vwp + vwp) % vwp - 60;
+      var cxp = ((cl.base - X * cl.depth) % vwp + vwp) % vwp - 60;
       cl.el.style.transform = 'translate3d(' + cxp.toFixed(1) + 'px,0,0)';
     }
 
@@ -1793,18 +2015,28 @@ if (!REDUCED) (function(){
   requestAnimationFrame(frame);
 })();
 
-/* ---------- 8. THREE.JS VOXEL SCENES ---------- */
+/* ---------- 8. THREE.JS VOXEL SCENES ---------- *
+ * Two contained stages — nothing 3D ever sits behind body text:
+ *   a) hero: floating voxel island (dino, character, tree) — click to jump
+ *   b) about: pinned scroll story — the bag opens, résumé + skills pop out */
 var HAS3D = (typeof THREE !== 'undefined') && !REDUCED && (function(){
   try {
     var c = document.createElement('canvas');
     return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
   } catch(e){ return false; }
 })();
+if (!HAS3D) html.classList.add('no-3d');
 
-if (!HAS3D){
-  var cv = document.getElementById('three-canvas'); if (cv) cv.style.display = 'none';
-  var sc = document.getElementById('steve-canvas'); if (sc) sc.style.display = 'none';
-  var sf = document.getElementById('steve-fallback'); if (sf) sf.style.display = 'grid';
+function seg(q, a, b){ return clamp((q - a) / (b - a), 0, 1); }
+function easeIO(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
+function backOut(t){ var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+function watch(el){
+  var s = { on: true };
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){ s.on = en[en.length - 1].isIntersecting; }, { rootMargin: '150px 0px' }).observe(el);
+  }
+  return s;
 }
 
 /* ---- shared voxel builders ---- */
@@ -1905,301 +2137,636 @@ function buildDino(M, k){
   return g;
 }
 
-/* ---- main background scene ---- */
-if (HAS3D) (function(){
-  var canvas = document.getElementById('three-canvas');
-  var renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !MOBILE, powerPreference: 'high-performance' });
-  } catch(e){ canvas.style.display = 'none'; return; }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 2));
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
+function lm(c, o){
+  return new THREE.MeshLambertMaterial(o === undefined ? { color: c } : { color: c, transparent: true, opacity: o });
+}
+function castAll(obj){ obj.traverse(function(o){ if (o.isMesh) o.castShadow = true; }); }
+
+function buildTree(){
+  var g = new THREE.Group();
+  var trunk = lm(0x6e6157), la = lm(0x3f93c2), lb = lm(0x5db6e2), lc = lm(0x2f7aa6);
+  g.add(box(.62, 2.5, .62, 0, 1.25, 0, trunk));
+  g.add(box(2.7, .95, 2.7, 0, 2.55, 0, la));
+  g.add(box(2.0, .9, 2.0, 0, 3.45, 0, lb));
+  g.add(box(1.0, .7, 1.0, 0, 4.2, 0, la));
+  g.add(box(.9, .9, .9, 1.25, 2.95, .7, lc));
+  g.add(box(.9, .9, .9, -1.1, 2.25, -.9, lb));
+  g.add(box(.8, .8, .8, -.6, 3.3, 1.05, lc));
+  return g;
+}
+function buildCactus(m){
+  var g = new THREE.Group();
+  g.add(box(.5, 1.9, .5, 0, .95, 0, m));
+  g.add(box(.42, .42, .42, .42, .9, 0, m));  g.add(box(.42, .7, .42, .62, 1.3, 0, m));
+  g.add(box(.42, .42, .42, -.42, 1.2, 0, m)); g.add(box(.42, .6, .42, -.62, 1.55, 0, m));
+  return g;
+}
+function buildCloud(m){
+  var g = new THREE.Group();
+  g.add(box(2.6, .5, 1.3, 0, 0, 0, m));
+  g.add(box(1.5, .5, 1.0, .3, .45, 0, m));
+  return g;
+}
+
+/* Laptop bag / briefcase. Local frame = lying flat: x = length, y = thickness,
+   z = depth; the handle is on the +z edge and the lid hinges on the -z edge. */
+function buildCase(u){
+  var outer = new THREE.Group(), inner = new THREE.Group();
+  outer.add(inner);
+  var leather = lm(0x2c3a45), trim = lm(0x4fc3f7), metal = lm(0xcdedfd), dark = lm(0x1a232a);
+  var L = 9 * u, D = 6.5 * u, TB = 1.6 * u, TL = 1.0 * u;
+  inner.add(box(L, TB, D, 0, -TB / 2, 0, leather));
+  inner.add(box(L + .01, .3 * u, D + .01, 0, -TB + .55 * u, 0, trim));
+  inner.add(box(.5 * u, .5 * u, .9 * u, -1.4 * u, -TB / 2, D / 2 + .45 * u, dark));
+  inner.add(box(.5 * u, .5 * u, .9 * u,  1.4 * u, -TB / 2, D / 2 + .45 * u, dark));
+  inner.add(box(3.3 * u, .55 * u, .55 * u, 0, -TB / 2, D / 2 + .95 * u, dark));
+  inner.add(box(.7 * u, .6 * u, .2 * u, -2.8 * u, -.3 * u, D / 2 + .1 * u, metal));
+  inner.add(box(.7 * u, .6 * u, .2 * u,  2.8 * u, -.3 * u, D / 2 + .1 * u, metal));
+
+  var glowMat = new THREE.MeshBasicMaterial({ color: 0x8ad6fb, transparent: true, opacity: 0 });
+  inner.add(box(L - .6 * u, .05 * u, D - .6 * u, 0, -.03 * u, 0, glowMat));
+
+  var lid = new THREE.Group();
+  lid.position.set(0, 0, -D / 2);
+  inner.add(lid);
+  lid.add(box(L, TL, D, 0, TL / 2, D / 2, leather));
+  lid.add(box(L + .01, .22 * u, D + .01, 0, TL * .5, D / 2, trim));
+  lid.add(box(1.7 * u, .08 * u, 1.7 * u, 0, TL + .04 * u, D / 2, metal));
+
+  outer.userData = { inner: inner, lid: lid, glowMat: glowMat, L: L, D: D };
+  return outer;
+}
+
+/* ---- a) hero island ---- */
+if (HAS3D) (function(){
+  var stage = document.getElementById('hero-stage');
+  var canvas = document.getElementById('hero-canvas');
+  var tag = document.getElementById('stage-tag');
+  if (!stage || !canvas) return;
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: 'high-performance' }); }
+  catch(e){ html.classList.add('no-3d'); return; }
+  if (tag && !FINE) tag.innerHTML = 'tap the island · <b>the dino jumps</b>';
+  var SHADOWS = !MOBILE;
+  if (SHADOWS){ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
 
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, .1, 240);
-  camera.position.set(0, 0, 30);
+  var camera = new THREE.PerspectiveCamera(30, 1, .1, 140);
+  var DIR = [.6, .42, .68], LOOKY = .7;
+  var M = mats(1);
+  var world = new THREE.Group(); scene.add(world);
+  var island = new THREE.Group(); world.add(island);
 
-  var M = mats(.34);
-  var MS = mats(1);
-  var world = new THREE.Group();
-  scene.add(world);
+  /* terrain: an upside-down stepped cone of blocks with a blue "grass" cap */
+  var seed = 11;
+  function rnd(){ seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  var lists = { a: [], b: [], ore: [], cap: [] };
+  var RAD = [4.7, 4.0, 3.0, 1.9, .9];
+  for (var L = 0; L < RAD.length; L++){
+    var r = RAD[L];
+    for (var x = -5; x <= 5; x++) for (var z = -5; z <= 5; z++){
+      var dd = x * x + z * z;
+      if (dd > r * r) continue;
+      if (L > 0 && dd > (r - 1) * (r - 1) && rnd() < .18) continue;
+      var roll = rnd();
+      var kind = (L > 0 && roll < .1) ? 'ore' : (roll < .45 ? 'b' : 'a');
+      lists[kind].push([x, -L, z]);
+      if (L === 0) lists.cap.push([x, 0, z]);
+    }
+  }
+  var dummy = new THREE.Object3D();
+  var unit = new THREE.BoxGeometry(1, 1, 1);
+  function inst(list, geo, mat, yo){
+    var im = new THREE.InstancedMesh(geo, mat, list.length);
+    for (var i = 0; i < list.length; i++){
+      dummy.position.set(list[i][0], list[i][1] + yo, list[i][2]);
+      dummy.updateMatrix();
+      im.setMatrixAt(i, dummy.matrix);
+    }
+    im.instanceMatrix.needsUpdate = true;
+    im.receiveShadow = SHADOWS;
+    island.add(im);
+    return im;
+  }
+  inst(lists.a, unit, lm(0x6c7883), 0);
+  inst(lists.b, unit, lm(0x5c6873), 0);
+  inst(lists.ore, unit, lm(0x8fd8f8), 0);
+  inst(lists.cap, new THREE.BoxGeometry(1.02, .26, 1.02), lm(0x4cb3e4), .39);
+  var Y0 = .52;
 
-  function xs(){ return clamp((window.innerWidth / window.innerHeight) / 1.55, .34, 1.15); }
-  var XS = xs();
+  var crystalMat = new THREE.MeshBasicMaterial({ color: 0x8ad6fb });
+  var crystal = new THREE.Group();
+  crystal.add(box(.55, .55, .55, 0, 0, 0, crystalMat));
+  crystal.add(box(.3, .3, .3, 0, -.45, 0, crystalMat));
+  crystal.position.set(0, -4.95, 0);
+  island.add(crystal);
 
-  /* floating minecraft blocks */
-  var geo = new THREE.BoxGeometry(1, 1, 1);
-  var bmats = [
-    new THREE.MeshLambertMaterial({ color: 0x4fc3f7, transparent: true, opacity: .2 }),
-    new THREE.MeshLambertMaterial({ color: 0x8d969d, transparent: true, opacity: .2 }),
-    new THREE.MeshLambertMaterial({ color: 0x2b8fc7, transparent: true, opacity: .2 }),
-    new THREE.MeshLambertMaterial({ color: 0x5d6c78, transparent: true, opacity: .2 })
-  ];
-  var edgeMat = new THREE.LineBasicMaterial({ color: 0x8ad6fb, transparent: true, opacity: .3 });
-  var BLOCKS = [];
-  var nBlocks = MOBILE ? 6 : 14;
-  for (var i = 0; i < nBlocks; i++){
-    var s = .7 + Math.random() * 2.6;
-    var b = new THREE.Mesh(geo, bmats[i % bmats.length]);
-    b.scale.set(s, s, s);
-    var ang = Math.random() * Math.PI * 2;
-    var side = i % 2 ? 1 : -1;
-    b.position.set(side * (15 + Math.random() * 12) * (XS + .2), (Math.random() - .5) * 30, -24 + Math.random() * 14);
-    b.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-    b.userData = {
-      rx: (Math.random() - .5) * .006,
-      ry: (Math.random() - .5) * .006,
-      rz: (Math.random() - .5) * .004,
-      amp: .4 + Math.random() * 1.1,
-      spd: .25 + Math.random() * .5,
-      off: Math.random() * 6.28,
-      y0: b.position.y
-    };
-    world.add(b);
-    BLOCKS.push(b);
+  var dino = buildDino(M, .78);
+  dino.position.set(1.15, Y0, .15); dino.rotation.y = .5;
+  island.add(dino);
+  var steve = buildSteve(M, .095);
+  steve.position.set(-1.6, Y0, 1.9); steve.rotation.y = .62;
+  island.add(steve);
+  var SP = steve.userData.parts;
+  var tree = buildTree(); tree.position.set(-2.8, Y0, -2.0); island.add(tree);
+  var cactus = buildCactus(M.grey); cactus.position.set(3.5, Y0, -1.3); island.add(cactus);
+  var tuftA = lm(0xcdedfd), tuftB = lm(0x8ad6fb);
+  [[-.2, 3.0], [2.1, -2.4], [-3.6, .7], [1.4, 2.9], [-.9, -3.4], [3.4, -.6]].forEach(function(p, i){
+    island.add(box(.16, .26, .16, p[0], Y0 + .13, p[1], i % 2 ? tuftA : tuftB));
+  });
+
+  var floaters = [];
+  var fm = [lm(0x4fc3f7, .92), lm(0x8d969d, .92), lm(0xcdedfd, .92)];
+  for (var i = 0; i < (MOBILE ? 4 : 7); i++){
+    var s = .32 + rnd() * .38;
+    var f = new THREE.Mesh(unit, fm[i % 3]);
+    f.scale.set(s, s, s);
+    f.userData = { a: i / 7 * Math.PI * 2, r: 5.8 + rnd() * 1.2, h: -2 + rnd() * 5.5, sp: .1 + rnd() * .12, ph: rnd() * 6 };
+    world.add(f);
+    floaters.push(f);
+  }
+  var cloudM = lm(0xe8f1f6, .92);
+  var clouds = [buildCloud(cloudM), buildCloud(cloudM)];
+  clouds[0].position.set(-3.2, 5.4, -2.6);
+  clouds[1].position.set(3.4, 6.2, .8); clouds[1].scale.set(.8, .8, .8);
+  clouds.forEach(function(c){ world.add(c); });
+
+  scene.add(new THREE.HemisphereLight(0xe8f6ff, 0x1b2832, .85));
+  var sun = new THREE.DirectionalLight(0xffffff, .85);
+  sun.position.set(6, 12, 6);
+  if (SHADOWS){
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 1024; sun.shadow.mapSize.height = 1024;
+    var sc = sun.shadow.camera;
+    sc.left = -7; sc.right = 7; sc.top = 7; sc.bottom = -7; sc.near = 1; sc.far = 40;
+    sun.shadow.bias = -.002;
+    [dino, steve, tree, cactus].forEach(castAll);
+  }
+  scene.add(sun);
+  var under = new THREE.PointLight(0x4fc3f7, 1.3, 11);
+  under.position.set(0, -3.6, 0);
+  island.add(under);
+
+  var dust = [], dustM = lm(0xb7c4cd, .9), dustT = -1;
+  for (var di = 0; di < 8; di++){
+    var dm = new THREE.Mesh(unit, dustM);
+    dm.visible = false; dm.userData = { a: di / 8 * Math.PI * 2 };
+    island.add(dm); dust.push(dm);
   }
 
-  /* voxel dinosaurs */
-  var DINOS = [];
-  var dinoSpots = MOBILE
-    ? [{ x: 5.5, y: -6, z: -8, s: 1.0, ry: -0.5 }]
-    : [{ x: -19, y: -6, z: -8, s: 1.2, ry: 0.55 },
-       { x: 20, y: 6, z: -12, s: 1.0, ry: -0.7 }];
-  dinoSpots.forEach(function(d){
-    var g = buildDino(MS, d.s);
-    g.position.set(d.x * XS, d.y, d.z);
-    g.rotation.y = d.ry;
-    g.userData.ry0 = d.ry;
-    g.userData.y0 = d.y;
-    world.add(g);
-    DINOS.push(g);
-  });
-
-  /* walking minecraft characters */
-  var WALKERS = [];
-  var walkSpots = MOBILE
-    ? []
-    : [{ y: -12.5, z: -4, k: .22, range: 15, spd: 1.8 }];
-  walkSpots.forEach(function(w, idx){
-    var g = buildSteve(MS, w.k);
-    g.position.set((idx ? -1 : 1) * w.range * .5 * XS, w.y, w.z);
-    world.add(g);
-    WALKERS.push({
-      g: g, parts: g.userData.parts, y0: w.y,
-      dir: idx ? -1 : 1, range: w.range * XS, spd: w.spd, ph: Math.random() * 6.28
-    });
-  });
-
-  scene.add(new THREE.AmbientLight(0xbfe4f8, .62));
-  var dl = new THREE.DirectionalLight(0xffffff, .78); dl.position.set(8, 16, 14); scene.add(dl);
-  var pl = new THREE.PointLight(0x4fc3f7, .95, 110); pl.position.set(-16, -6, 10); scene.add(pl);
-
-  var stars = null;
-
-  var mx = 0, my = 0;
-  if (FINE) window.addEventListener('mousemove', function(e){
-    mx = (e.clientX / window.innerWidth - .5) * 2;
-    my = -(e.clientY / window.innerHeight - .5) * 2;
+  var mx = 0, my = 0, tmx = 0, tmy = 0;
+  window.addEventListener('mousemove', function(e){
+    tmx = (e.clientX / window.innerWidth - .5) * 2;
+    tmy = (e.clientY / window.innerHeight - .5) * 2;
   }, { passive: true });
+  var jumpT = -1, waveT = -1, nextWave = 2.2;
+  canvas.addEventListener('pointerdown', function(){ if (jumpT < 0) jumpT = 0; });
 
-  var t = 0, prev = performance.now(), acc = 0;
-  var MINDT = MOBILE ? 1 / 40 : 0;
-
-  function render(now){
-    requestAnimationFrame(render);
-    if (document.hidden) return;
-    var dt = Math.min((now - prev) / 1000, .05);
-    prev = now;
-    if (MINDT){ acc += dt; if (acc < MINDT) return; dt = acc; acc = 0; }
-    t += dt;
-
-    /* only lives behind the hero: fade out as it scrolls away, then stop drawing */
-    var hero = document.getElementById('hero');
-    var fade = clamp(1 - window.scrollY / ((hero ? hero.offsetHeight : window.innerHeight) * .7), 0, 1);
-    canvas.style.opacity = (fade * (html.getAttribute('data-theme') === 'light' ? .45 : .85)).toFixed(3);
-    if (fade <= 0) return;
-
-    var p = progress();
-
-    for (var i = 0; i < BLOCKS.length; i++){
-      var b = BLOCKS[i], u = b.userData;
-      b.rotation.x += u.rx; b.rotation.y += u.ry; b.rotation.z += u.rz;
-      b.position.y = u.y0 + Math.sin(t * u.spd + u.off) * u.amp;
-    }
-
-    for (var d = 0; d < DINOS.length; d++){
-      var g = DINOS[d], ud = g.userData;
-      g.position.y = ud.y0 + Math.sin(t * .7 + ud.phase) * .5;
-      g.rotation.y = ud.ry0 + Math.sin(t * .34 + ud.phase) * .45;
-      var sw = Math.sin(t * 2.4 + ud.phase) * .32;
-      ud.legs[0].rotation.x = sw;
-      ud.legs[1].rotation.x = -sw;
-    }
-
-    for (var w = 0; w < WALKERS.length; w++){
-      var W = WALKERS[w];
-      W.g.position.x += W.dir * W.spd * dt;
-      if (W.g.position.x > W.range){ W.g.position.x = W.range; W.dir = -1; }
-      if (W.g.position.x < -W.range){ W.g.position.x = -W.range; W.dir = 1; }
-      W.g.rotation.y = W.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
-      W.ph += dt * W.spd * 3.6;
-      var s = Math.sin(W.ph);
-      W.parts.legL.rotation.x = s * .62;
-      W.parts.legR.rotation.x = -s * .62;
-      W.parts.armL.rotation.x = -s * .52;
-      W.parts.armR.rotation.x = s * .52;
-      W.parts.head.rotation.y = Math.sin(W.ph * .33) * .3;
-      W.g.position.y = W.y0 + Math.abs(Math.sin(W.ph)) * .055;
-    }
-
-    if (stars) stars.rotation.y += .0004;
-
-    world.rotation.y = -.26 + p * .95;
-    world.position.y = p * 7;
-    camera.position.x += (mx * 3.6 - camera.position.x) * .05;
-    camera.position.y += (my * 2.6 - camera.position.y) * .05;
-    camera.position.z += ((30 - p * 5) - camera.position.z) * .06;
-    camera.lookAt(0, 0, 0);
-
-    renderer.render(scene, camera);
-  }
-  requestAnimationFrame(render);
-
-  var rt2;
-  window.addEventListener('resize', function(){
-    clearTimeout(rt2);
-    rt2 = setTimeout(function(){
-      MOBILE = window.innerWidth < 769;
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 2));
-      renderer.setSize(window.innerWidth, window.innerHeight, false);
-      XS = xs();
-    }, 150);
-  });
-})();
-
-/* ---- player-card scene: voxel Vikas, waves and tracks the cursor ---- */
-if (HAS3D) (function(){
-  var canvas = document.getElementById('steve-canvas');
-  if (!canvas) return;
-  var renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-  } catch(e){
-    canvas.style.display = 'none';
-    var fb = document.getElementById('steve-fallback'); if (fb) fb.style.display = 'grid';
-    return;
-  }
   function size(){
-    var w = canvas.clientWidth || 320, h = canvas.clientHeight || 330;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    var w = stage.clientWidth || 400, h = stage.clientHeight || 400;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 2));
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
+    var aspect = w / h;
+    camera.aspect = aspect;
+    var need = 6.3;
+    var dist = need / Math.tan(15 * Math.PI / 180) / Math.min(1, aspect);
+    var n = Math.sqrt(DIR[0] * DIR[0] + DIR[1] * DIR[1] + DIR[2] * DIR[2]);
+    camera.position.set(DIR[0] / n * dist, LOOKY + DIR[1] / n * dist, DIR[2] / n * dist);
+    camera.lookAt(0, LOOKY, 0);
     camera.updateProjectionMatrix();
   }
-
-  var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(42, 1, .1, 60);
-  camera.position.set(0, 2.5, 7.4);
-  camera.lookAt(0, 2.05, 0);
-
-  var M = mats(1);
-  var hero = buildSteve(M, .135);
-  var P = hero.userData.parts;
-  var rig = new THREE.Group();
-  rig.add(hero);
-  scene.add(rig);
-
-  /* grass-style block the character stands on */
-  var plat = new THREE.Group();
-  plat.add(box(3.4, 1.0, 3.4, 0, -.5, 0, M.stone));
-  plat.add(box(3.46, .22, 3.46, 0, .02, 0, M.blue));
-  plat.position.y = -.02;
-  scene.add(plat);
-
-  /* a few drifting blocks for depth */
-  var bits = [];
-  var bgeo = new THREE.BoxGeometry(1, 1, 1);
-  var bmat = new THREE.MeshLambertMaterial({ color: 0x4fc3f7, transparent: true, opacity: .4 });
-  var bmat2 = new THREE.MeshLambertMaterial({ color: 0x8d969d, transparent: true, opacity: .32 });
-  for (var i = 0; i < 7; i++){
-    var s = .2 + Math.random() * .34;
-    var b = new THREE.Mesh(bgeo, i % 2 ? bmat2 : bmat);
-    b.scale.set(s, s, s);
-    var a = (i / 7) * Math.PI * 2;
-    b.position.set(Math.cos(a) * (2.2 + Math.random()), 1 + Math.random() * 3.4, Math.sin(a) * 1.6 - .4);
-    b.userData = { y0: b.position.y, off: Math.random() * 6.28, sp: .5 + Math.random() * .7 };
-    scene.add(b);
-    bits.push(b);
-  }
-
-  scene.add(new THREE.AmbientLight(0xcfeaf9, .78));
-  var d1 = new THREE.DirectionalLight(0xffffff, .85); d1.position.set(4, 8, 7); scene.add(d1);
-  var d2 = new THREE.PointLight(0x4fc3f7, .7, 24); d2.position.set(-4, 2, 5); scene.add(d2);
-
-  var mx = 0, my = 0;
-  window.addEventListener('mousemove', function(e){
-    var r = canvas.getBoundingClientRect();
-    mx = clamp((e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2), -1, 1);
-    my = clamp((e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2), -1, 1);
-  }, { passive: true });
-
-  var visible = true;
-  if ('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(en){ visible = en[0].isIntersecting; }, { threshold: 0 });
-    io.observe(canvas);
-  }
-
-  var t = 0, prev = performance.now(), waveT = -1, nextWave = 2.2;
   size();
-  window.addEventListener('resize', function(){ size(); });
+  window.addEventListener('resize', size);
 
-  function render(now){
-    requestAnimationFrame(render);
+  var vis = watch(stage);
+  var t = 0, prev = performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
     var dt = Math.min((now - prev) / 1000, .05);
     prev = now;
-    if (document.hidden || !visible) return;
+    if (document.hidden || !vis.on) return;
     t += dt;
+    mx += (tmx - mx) * .05; my += (tmy - my) * .05;
 
-    /* idle breathing + bob */
-    var bob = Math.sin(t * 1.5) * .06;
-    hero.position.y = bob;
-    rig.rotation.y += ((mx * .55) - rig.rotation.y) * .05;
-    P.head.rotation.y += ((mx * .7) - P.head.rotation.y) * .08;
-    P.head.rotation.x += ((my * .4) - P.head.rotation.x) * .08;
+    world.rotation.y = -.2 + Math.sin(t * .22) * .3 + mx * .35;
+    world.rotation.x = my * .05;
+    island.position.y = Math.sin(t * .9) * .14;
+    crystal.rotation.y += dt * .8;
 
-    /* periodic wave with the right arm */
-    if (waveT < 0 && t > nextWave){ waveT = 0; }
-    if (waveT >= 0){
-      waveT += dt;
-      var e = waveT / 1.7;
-      if (e >= 1){ waveT = -1; nextWave = t + 4.5 + Math.random() * 3; }
+    /* dino: click to jump, legs tuck in the air */
+    var dh = 0, legs = dino.userData.legs;
+    if (jumpT >= 0){
+      jumpT += dt;
+      var u = jumpT / .72;
+      if (u >= 1){ jumpT = -1; dustT = 0; }
+      else dh = 1.8 * 4 * u * (1 - u);
+    }
+    var air = dh > .01;
+    dino.position.y = Y0 + dh + (air ? 0 : Math.abs(Math.sin(t * 2.4)) * .015);
+    legs[0].rotation.z += ((air ? .6 : 0) - legs[0].rotation.z) * .3;
+    legs[1].rotation.z += ((air ? -.45 : 0) - legs[1].rotation.z) * .3;
+
+    /* landing dust */
+    if (dustT >= 0){
+      dustT += dt;
+      var k = dustT / .55;
+      if (k >= 1){ dustT = -1; dust.forEach(function(d){ d.visible = false; }); }
       else {
-        var ease = Math.sin(Math.min(1, e * 2.2) * Math.PI / 2);
-        var fall = e > .72 ? 1 - (e - .72) / .28 : 1;
-        P.armR.rotation.z = 2.55 * ease * fall + Math.sin(t * 11) * .3 * ease * fall;
-        P.armR.rotation.x = -.15 * ease * fall;
+        for (var j = 0; j < dust.length; j++){
+          var d = dust[j], a = d.userData.a, rr = .5 + k * 1.4, ss = .22 * (1 - k);
+          d.visible = true;
+          d.position.set(dino.position.x + Math.cos(a) * rr, Y0 + .1 + k * .35, dino.position.z + Math.sin(a) * rr);
+          d.scale.set(ss, ss, ss);
+        }
+        dustM.opacity = .9 * (1 - k);
       }
-    } else {
-      P.armR.rotation.z += (0 - P.armR.rotation.z) * .1;
-      P.armR.rotation.x += (Math.sin(t * 1.5) * .05 - P.armR.rotation.x) * .1;
     }
-    P.armL.rotation.x = Math.sin(t * 1.5 + 1) * .06;
-    P.legL.rotation.x = Math.sin(t * 1.5) * .02;
-    P.legR.rotation.x = -Math.sin(t * 1.5) * .02;
 
-    for (var i = 0; i < bits.length; i++){
-      var b = bits[i];
-      b.rotation.x += .004; b.rotation.y += .006;
-      b.position.y = b.userData.y0 + Math.sin(t * b.userData.sp + b.userData.off) * .22;
+    /* character: cheers when the dino jumps, otherwise waves now and then */
+    var cj = jumpT >= .1 ? clamp((jumpT - .1) / .55, 0, 1) : 0;
+    var cheer = Math.sin(Math.PI * cj);
+    steve.position.y = Y0 + .5 * cheer * (cj < 1 ? 1 : 0);
+    if (cheer > .01){
+      SP.armL.rotation.z = -2.5 * cheer; SP.armR.rotation.z = 2.5 * cheer; waveT = -1;
+    } else {
+      SP.armL.rotation.z *= .85;
+      if (waveT < 0 && t > nextWave) waveT = 0;
+      if (waveT >= 0){
+        waveT += dt;
+        var we = waveT / 1.6;
+        if (we >= 1){ waveT = -1; nextWave = t + 4 + Math.random() * 3; }
+        else {
+          var up = Math.sin(Math.min(1, we * 2.4) * Math.PI / 2) * (we > .75 ? 1 - (we - .75) / .25 : 1);
+          SP.armR.rotation.z = 2.5 * up + Math.sin(t * 11) * .3 * up;
+        }
+      } else SP.armR.rotation.z *= .85;
     }
-    plat.rotation.y += .0025;
+    SP.head.rotation.y += ((mx * .5) - SP.head.rotation.y) * .08;
+
+    for (var fi = 0; fi < floaters.length; fi++){
+      var fl = floaters[fi], fu = fl.userData, ang = fu.a + t * fu.sp;
+      fl.position.set(Math.cos(ang) * fu.r, fu.h + Math.sin(t * .8 + fu.ph) * .35, Math.sin(ang) * fu.r);
+      fl.rotation.x += dt * .5; fl.rotation.y += dt * .7;
+    }
+    for (var ci = 0; ci < clouds.length; ci++){
+      var cl = clouds[ci];
+      cl.position.x += dt * (.22 + ci * .08);
+      if (cl.position.x > 7.5) cl.position.x = -7.5;
+    }
 
     renderer.render(scene, camera);
   }
-  requestAnimationFrame(render);
+  requestAnimationFrame(frame);
+})();
+
+/* ---- b) about: pinned scroll story ----
+ * q = how far through the pinned section you are (0..1). Everything is a pure
+ * function of q, so it scrubs forwards and backwards with the scroll.
+ *   .00–.12  bio + wave         .15–.30  bag tossed up, spins, lands in front
+ *   .30–.38  lid opens, glow    .31–.50  particles + paper sheets fly out
+ *   .36–.48  résumé card pops   .52/.64/.76  Full Stack / DevOps / Core CS pop  */
+(function(){
+  var sec = document.getElementById('about');
+  var track = document.getElementById('scene-track');
+  var stage = document.getElementById('scene-stage');
+  var canvas = document.getElementById('scene-canvas');
+  var ui = document.getElementById('scene-ui');
+  var bio = document.getElementById('scene-bio');
+  var wrap = document.getElementById('scene-cards');
+  var quest = document.getElementById('scene-quest');
+  var anchor = document.getElementById('skills');
+  if (!sec || !track || !stage || !wrap) return;
+  var cards = Array.prototype.slice.call(wrap.querySelectorAll('.pop-card'));
+  var row = wrap.querySelector('.skill-row');
+  var steps = quest ? Array.prototype.slice.call(quest.children) : [];
+
+  function goStatic(){
+    sec.classList.remove('is-live', 'mode-wide', 'mode-side', 'mode-stack');
+    if (anchor && row) row.parentNode.insertBefore(anchor, row);
+  }
+  if (!HAS3D){ goStatic(); return; }
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); }
+  catch(e){ goStatic(); return; }
+  sec.classList.add('is-live');
+
+  /* ---------- 3D set ---------- */
+  var scene = new THREE.Scene();
+  var FOV = 30, TANH = Math.tan(FOV * Math.PI / 360);
+  var camera = new THREE.PerspectiveCamera(FOV, 1, .1, 200);
+  var CAMY = 2.2, DIST = 14;
+  var K = .135;
+  var M = mats(1);
+  var rig = new THREE.Group(); scene.add(rig);
+  var hero = buildSteve(M, K); rig.add(hero);
+  var P = hero.userData.parts;
+  var capM = lm(0x4cb3e4), stoneM = lm(0x6c7883);
+  for (var gx = -1; gx <= 1; gx++) for (var gz = -1; gz <= 1; gz++){
+    rig.add(box(.6, .6, .6, gx * .6, -.3, gz * .6, stoneM));
+    rig.add(box(.612, .14, .612, gx * .6, -.07, gz * .6, capM));
+  }
+
+  var bag = buildCase(K);
+  scene.add(bag);
+  var B = bag.userData;
+  var strap = box(13.8 * K, .9 * K, .35 * K, 1 * K, 17.8 * K, 2.5 * K, lm(0x1a232a));
+  strap.rotation.z = 1.12;
+  hero.add(strap);
+
+  var sheetM = lm(0xf4f7f9, 1), inkM = lm(0x9aa6b1);
+  var sheets = [];
+  for (var si = 0; si < 3; si++){
+    var sh = box(6 * K, .1 * K, 4.4 * K, 0, -.5 * K, 0, sheetM);
+    for (var ln = 0; ln < 3; ln++) sh.add(box(4 * K, .04 * K, .32 * K, -.4 * K, .07 * K, (-1.2 + ln * 1.1) * K, inkM));
+    sh.visible = false;
+    B.inner.add(sh);
+    sheets.push(sh);
+  }
+
+  var unit = new THREE.BoxGeometry(1, 1, 1);
+  var partA = lm(0x8ad6fb, 1), partB = lm(0xcdedfd, 1);
+  var parts = [];
+  for (var pi = 0; pi < 18; pi++){
+    var pm = new THREE.Mesh(unit, pi % 2 ? partA : partB);
+    var ps = .06 + Math.random() * .08;
+    pm.scale.set(ps, ps, ps);
+    var th = Math.random() * Math.PI * 2, ph = Math.random() * 1.2;
+    pm.userData = { dx: Math.cos(th) * Math.cos(ph), dy: Math.abs(Math.sin(ph)) + .25, dz: Math.sin(th) * Math.cos(ph) * .6, s: ps };
+    pm.visible = false;
+    scene.add(pm);
+    parts.push(pm);
+  }
+
+  var sparkM = lm(0xcdedfd, 0), sparks = [];
+  for (var sj = 0; sj < 12; sj++){
+    var spm = new THREE.Mesh(unit, sparkM);
+    spm.userData = { x: (Math.random() - .5) * 1.1, z: (Math.random() - .5) * .5, ph: Math.random(), v: .35 + Math.random() * .35, s: .05 + Math.random() * .06 };
+    spm.visible = false;
+    scene.add(spm); sparks.push(spm);
+  }
+
+  var floatM = [lm(0x4fc3f7, .85), lm(0x8d969d, .85)];
+  var floats = [];
+  [[-1.5, 3.6, -.6, .26], [1.3, 4.3, -1, .2], [-1.2, 1.2, .8, .18], [1.7, .9, -.4, .24]].forEach(function(f, i){
+    var fb = new THREE.Mesh(unit, floatM[i % 2]);
+    fb.scale.set(f[3], f[3], f[3]);
+    fb.position.set(f[0], f[1], f[2]);
+    fb.userData = { y0: f[1], ph: i * 1.7 };
+    rig.add(fb); floats.push(fb);
+  });
+
+  scene.add(new THREE.HemisphereLight(0xe8f6ff, 0x1b2832, .9));
+  var key = new THREE.DirectionalLight(0xffffff, .75); key.position.set(4, 9, 8); scene.add(key);
+  var loot = new THREE.PointLight(0x4fc3f7, 0, 7); scene.add(loot);
+
+  /* ---------- layout: where the character stands, how cards are arranged ---------- */
+  var mode = '', W = 1, H = 1, aspect = 1, rigYaw = 0, STICK = 62, TOTAL = 1;
+  var PRES = { x: 1.5, y: 2.6, z: 1 }, PSCALE = 1.5, LIFT = 14;
+  var rest = [], fitWide = 1, fitCard = [1, 1, 1, 1], bioFit = 1;
+  var WIN = [[.36, .48], [.52, .62], [.64, .74], [.76, .86]];
+  var EXIT = [.49, .555];
+  var HELD = { x: -4.3 * K, y: 8.4 * K, z: 3.1 * K };
+  var lastQ = -1;
+
+  function baseT(){ return mode === 'side' ? 'translateY(-50%) ' : ''; }
+  function bioBase(){ return mode === 'stack' ? '' : 'translateY(-50%) '; }
+
+  function measure(){
+    wrap.style.setProperty('--fit', 1);
+    cards.forEach(function(c){ c.style.visibility = 'hidden'; c.style.opacity = '0'; c.style.transform = baseT(); });
+    bio.style.transform = bioBase();
+    var avail = Math.max(120, ui.clientHeight);
+    bioFit = clamp(avail / Math.max(1, bio.offsetHeight), .62, 1);
+    bio.style.transformOrigin = mode === 'stack' ? '50% 100%' : '0 50%';
+    if (mode === 'wide'){
+      var need = Math.max(cards[0].offsetHeight, row.offsetHeight);
+      fitWide = clamp(avail / Math.max(1, need), .6, 1);
+      wrap.style.setProperty('--fit', fitWide.toFixed(3));
+    } else fitWide = 1;
+    cards.forEach(function(c, i){
+      fitCard[i] = mode === 'wide' ? 1 : clamp(avail / Math.max(1, c.offsetHeight), .55, 1);
+      c.style.transform = baseT() + 'scale(' + fitCard[i].toFixed(3) + ')';
+    });
+    var sr = stage.getBoundingClientRect();
+    rest = cards.map(function(c){
+      var r = c.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - sr.left, y: r.top + r.height / 2 - sr.top };
+    });
+  }
+
+  function layout(){
+    W = stage.clientWidth || 1; H = stage.clientHeight || 1; aspect = W / H;
+    var m = W < 760 ? 'stack' : W < 1100 ? 'side' : 'wide';
+    if (m !== mode){
+      sec.classList.remove('mode-wide', 'mode-side', 'mode-stack');
+      sec.classList.add('mode-' + m);
+      mode = m;
+    }
+    var share = mode === 'stack' ? .29 : .6;          // character height as a share of the stage
+    var halfH = Math.max(5.0 / (2 * share), mode === 'stack' ? 0 : 3.6 / aspect);
+    DIST = halfH / TANH;
+    var halfW = halfH * aspect;
+    camera.aspect = aspect;
+    camera.position.set(0, CAMY, DIST);
+    camera.lookAt(0, CAMY, 0);
+    camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 2));
+    renderer.setSize(W, H, false);
+
+    var nx = mode === 'stack' ? 0 : -.58, ny = mode === 'stack' ? .34 : -.1;
+    rig.position.set(nx * halfW, CAMY + ny * halfH - 2.1, 0);
+    rigYaw = mode === 'stack' ? .1 : .42;
+    rig.rotation.y = rigYaw;
+    PRES = mode === 'stack' ? { x: .95, y: 2.5, z: 1.2 } : { x: 1.85, y: 2.6, z: 1.0 };
+    PSCALE = mode === 'stack' ? 1.3 : 1.6;
+    LIFT = mode === 'stack' ? 12 : 22;
+
+    STICK = parseFloat(getComputedStyle(stage).top) || 0;
+    TOTAL = Math.max(1, track.offsetHeight - stage.offsetHeight);
+    if (anchor) anchor.style.top = Math.round(.6 * TOTAL) + 'px';
+    measure();
+    lastQ = -1;
+  }
+
+  /* camera looks straight down -z, so projecting to stage pixels is exact */
+  function toStage(x, y, z){
+    var depth = DIST - z, hh = depth * TANH, hw = hh * aspect;
+    return { x: (x / hw + 1) * .5 * W, y: (1 - (y - CAMY) / hh) * .5 * H };
+  }
+
+  function placeBag(q, t){
+    var e = easeIO(seg(q, .15, .30));
+    var c = Math.cos(rigYaw), s = Math.sin(rigYaw);
+    var hx = rig.position.x + HELD.x * c + HELD.z * s;
+    var hy = rig.position.y + HELD.y + hero.position.y;
+    var hz = rig.position.z - HELD.x * s + HELD.z * c;
+    var px = rig.position.x + PRES.x, py = rig.position.y + PRES.y, pz = PRES.z;
+    var x = lerp(hx, px, e), y = lerp(hy, py, e) + Math.sin(Math.PI * e) * 1.15, z = lerp(hz, pz, e);
+    bag.position.set(x, y + Math.sin(t * 1.6) * .06 * e, z);
+    bag.rotation.y = lerp(rigYaw, Math.PI * 2 - .22, e);
+    strap.visible = e < .03;
+    B.inner.rotation.x = lerp(-Math.PI / 2, .62, e);
+    var sc = lerp(1, PSCALE, e);
+    bag.scale.set(sc, sc, sc);
+    return { x: x, y: y, z: z, e: e };
+  }
+
+  /* ---------- DOM: bio out, cards pop from the bag ---------- */
+  var navLast = '';
+  function dom(q, cp){
+    var eb = seg(q, .09, .19);
+    bio.style.opacity = (1 - eb).toFixed(3);
+    bio.style.visibility = eb >= 1 ? 'hidden' : '';
+    bio.style.pointerEvents = eb > .5 ? 'none' : '';
+    bio.style.transform = bioBase() + 'translateY(' + (-34 * eb).toFixed(1) + 'px) scale(' + (bioFit * (1 - .04 * eb)).toFixed(3) + ')';
+
+    var mv = WIN.map(function(w){ return easeOut(seg(q, w[0], w[1])); });
+    for (var i = 0; i < cards.length; i++){
+      var c = cards[i], w = WIN[i], tt = seg(q, w[0], w[1]);
+      if (tt <= 0){
+        c.style.opacity = '0'; c.style.visibility = 'hidden'; c.style.pointerEvents = 'none';
+        continue;
+      }
+      var dx = (cp.x - rest[i].x) * (1 - mv[i]), dy = (cp.y - rest[i].y) * (1 - mv[i]);
+      var s = .05 + .95 * backOut(tt), rot = (1 - mv[i]) * (i % 2 ? 16 : -16), op = clamp(tt * 4, 0, 1);
+      var tr;
+      if (mode === 'wide'){
+        if (i === 0){
+          var ex = easeIO(seg(q, EXIT[0], EXIT[1]));
+          op *= 1 - ex; s *= 1 - .1 * ex; dy -= 70 * ex;
+        }
+        tr = 'translate(' + (dx / fitWide).toFixed(1) + 'px,' + (dy / fitWide).toFixed(1) + 'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
+      } else {
+        var depth = 0;
+        for (var j = i + 1; j < cards.length; j++) depth += mv[j];
+        op *= depth <= 1 ? 1 : clamp(1 - (depth - 1) / .45, 0, 1);
+        c.style.setProperty('--dim', Math.min(.82, depth * .82).toFixed(3));
+        tr = 'translate(' + dx.toFixed(1) + 'px,' + (dy - LIFT * depth).toFixed(1) + 'px) ' + baseT() +
+             'rotate(' + rot.toFixed(2) + 'deg) scale(' + (s * fitCard[i] * (1 - .05 * depth)).toFixed(3) + ')';
+      }
+      c.style.transform = tr;
+      c.style.opacity = op.toFixed(3);
+      c.style.visibility = op > .002 ? 'visible' : 'hidden';
+      c.style.pointerEvents = op > .6 ? '' : 'none';
+      c.style.zIndex = String(10 + i);
+    }
+
+    var step = q >= .8 ? 4 : q >= .68 ? 3 : q >= .56 ? 2 : q >= .42 ? 1 : 0;
+    for (var k = 0; k < steps.length; k++) steps[k].className = k < step ? 'done' : k === step ? 'on' : '';
+    if (q > 0 && q < 1){
+      var nv = q >= .5 ? 'skills' : 'about';
+      if (nv !== navLast){ markNav(nv); navLast = nv; }
+    } else navLast = '';
+  }
+
+  /* ---------- loop ---------- */
+  var mx = 0, my = 0, tmx = 0, tmy = 0, waveT = -1, nextWave = .8;
+  window.addEventListener('mousemove', function(e){
+    tmx = (e.clientX / window.innerWidth - .5) * 2;
+    tmy = (e.clientY / window.innerHeight - .5) * 2;
+  }, { passive: true });
+
+  var vis = watch(track);
+  var t = 0, prev = performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    var dt = Math.min((now - prev) / 1000, .05);
+    prev = now;
+    if (document.hidden || !vis.on) return;
+    t += dt;
+    mx += (tmx - mx) * .06; my += (tmy - my) * .06;
+
+    var q = clamp((STICK - track.getBoundingClientRect().top) / TOTAL, 0, 1);
+
+    /* character */
+    hero.position.y = Math.sin(t * 1.5) * .045;
+    var toss = seg(q, .15, .30);
+    P.armL.rotation.x = -Math.sin(Math.PI * Math.min(1, toss * 1.4)) * 1.6;
+    var point = seg(q, .34, .44);
+    if (q < .12){
+      if (waveT < 0 && t > nextWave) waveT = 0;
+      if (waveT >= 0){
+        waveT += dt;
+        var we = waveT / 1.6;
+        if (we >= 1){ waveT = -1; nextWave = t + 3 + Math.random() * 2; }
+        else {
+          var up = Math.sin(Math.min(1, we * 2.4) * Math.PI / 2) * (we > .75 ? 1 - (we - .75) / .25 : 1);
+          P.armR.rotation.z = 2.5 * up + Math.sin(t * 11) * .3 * up;
+        }
+      } else P.armR.rotation.z *= .88;
+      P.armR.rotation.x *= .85;
+    } else {
+      waveT = -1;
+      P.armR.rotation.z += (.22 * point - P.armR.rotation.z) * .15;
+      P.armR.rotation.x += (-1.15 * point - P.armR.rotation.x) * .15;
+    }
+    var look = seg(q, .14, .3);
+    var ly = mode === 'stack' ? .15 : .55, lx = mode === 'stack' ? .3 : .05;
+    P.head.rotation.y = lerp(mx * .55, ly, look);
+    P.head.rotation.x = lerp(my * .3, lx, look);
+    P.legL.rotation.x = Math.sin(t * 1.5) * .02;
+    P.legR.rotation.x = -Math.sin(t * 1.5) * .02;
+    for (var fi = 0; fi < floats.length; fi++){
+      var fb = floats[fi];
+      fb.position.y = fb.userData.y0 + Math.sin(t * 1.1 + fb.userData.ph) * .18;
+      fb.rotation.x += dt * .6; fb.rotation.y += dt * .8;
+    }
+
+    /* the bag */
+    var bp = placeBag(q, t);
+    var open = easeOut(seg(q, .30, .38));
+    var pulse = 0;
+    for (var wi = 0; wi < WIN.length; wi++) pulse += Math.sin(Math.PI * seg(q, WIN[wi][0], WIN[wi][1]));
+    B.lid.rotation.x = -open * 2.05;
+    B.glowMat.opacity = open * .95;
+    /* loot sparkles drift up out of the open bag (brighter as each card pops) */
+    sparkM.opacity = open * (.75 + .25 * Math.min(1, pulse));
+    for (var sk = 0; sk < sparks.length; sk++){
+      var sp = sparks[sk], su = sp.userData, life = (t * su.v + su.ph) % 1;
+      sp.visible = open > .05;
+      if (!sp.visible) continue;
+      sp.position.set(bag.position.x + su.x * (1 + life * .6), bag.position.y + .15 + life * (1.5 + pulse * .6), bag.position.z + .3 + su.z);
+      var sz = su.s * (1 - life) * open;
+      sp.scale.set(sz, sz, sz);
+    }
+    loot.intensity = open * (1.6 + 1.6 * pulse);
+    loot.position.set(bag.position.x, bag.position.y + .5, bag.position.z + .4);
+
+    var eb = seg(q, .31, .47), em = easeOut(eb);
+    var pop = eb > 0 && eb < 1;
+    var pOp = eb < .1 ? eb / .1 : 1 - (eb - .1) / .9;
+    partA.opacity = partB.opacity = clamp(pOp, 0, 1);
+    for (var p = 0; p < parts.length; p++){
+      var pt = parts[p], u = pt.userData;
+      pt.visible = pop;
+      if (!pop) continue;
+      pt.position.set(bag.position.x + u.dx * em * 2.1, bag.position.y + .2 + u.dy * em * 1.9, bag.position.z + u.dz * em * 2.1);
+      var ss = u.s * (1 - eb * .5);
+      pt.scale.set(ss, ss, ss);
+      pt.rotation.x = eb * 6 + p; pt.rotation.y = eb * 4;
+    }
+
+    var es = seg(q, .33, .5), ee = easeOut(es);
+    sheetM.opacity = es < .2 ? es / .2 : (es > .65 ? Math.max(0, (1 - es) / .35) : 1);
+    for (var k = 0; k < sheets.length; k++){
+      var shp = sheets[k];
+      shp.visible = es > 0 && es < 1;
+      shp.position.set((k - 1) * 3.4 * K * ee, lerp(-.5 * K, (5.5 + k * 2.4) * K, ee), .4 * K);
+      shp.rotation.z = (k - 1) * .4 * ee;
+      shp.rotation.y = (k - 1) * .9 * ee;
+      shp.rotation.x = -.5 * ee;
+    }
+
+    if (Math.abs(q - lastQ) > 1e-5){ dom(q, toStage(bp.x, bp.y, bp.z)); lastQ = q; }
+    renderer.render(scene, camera);
+  }
+
+  var rt;
+  window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(layout, 120); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  layout();
+  requestAnimationFrame(frame);
 })();
 
 })();
